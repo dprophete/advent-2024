@@ -13,48 +13,29 @@ fn str_to_list_of_ints(s: &str) -> Vec<i64> {
         .collect::<Vec<_>>()
 }
 
+fn parse_line(line: &str) -> (i32, i32) {
+    let vals = line
+        .split(" ")
+        .filter(|x| x.len() > 0)
+        .map(|x| x.parse::<i32>().unwrap())
+        .collect::<Vec<_>>();
+    let [l, r, ..] = vals.as_slice() else {
+        panic!("invalid input")
+    };
+    (*l, *r)
+}
+
 fn p1(input: &str) {
     let file_content = fs::read_to_string(input).expect("cannot read sample file");
 
-    let mut res = Vec::new();
-    for (_idx, line) in file_content.lines().enumerate() {
-        let vals = line
-            .split(" ")
-            .filter(|x| x.len() > 0)
-            .map(|x| x.parse::<i32>().unwrap())
-            .collect::<Vec<_>>();
-        let [a, b, ..] = vals.as_slice() else {
-            panic!("invalid input")
-        };
-        res.push((*a, *b));
-    }
-    let (mut left, mut right): (Vec<i32>, Vec<i32>) = res.into_iter().unzip();
+    let (mut left, mut right): (Vec<i32>, Vec<i32>) = file_content.lines().map(parse_line).unzip();
     left.sort();
     right.sort();
 
-    let mut sum = 0;
-    for (i, l) in left.iter().enumerate() {
-        sum += (right[i] - l).abs();
-    }
+    let pairs: Vec<(i32, i32)> = left.into_iter().zip(right).collect();
+    let sum = pairs.iter().map(|(l, r)| (r - l).abs()).sum::<i32>();
 
     println!("p1 sum: {}", sum);
-    // file_content.pop();
-    //
-    // let lines = file_content
-    //     .split("\n")
-    //     .map(|line| {
-    //         let (_, nbs_str) = line.split_once(":").unwrap();
-    //         str_to_list_of_ints(nbs_str)
-    //     })
-    //     .collect::<Vec<_>>();
-    //
-    // let times = &lines[0];
-    // let dists = &lines[1];
-    // let mut res = 1;
-    // for (race_time, race_dist) in times.iter().zip(dists.iter()) {
-    //     res *= nb_wins(*race_time, *race_dist)
-    // }
-    // println!("p1 res for {}: {}", input, res);
 }
 
 //--------------------------------------------------------------------------------
