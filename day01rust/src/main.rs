@@ -26,7 +26,7 @@ fn p1(input: &str) {
     let pairs: Vec<(i32, i32)> = left.into_iter().zip(right).collect();
     let sum = pairs.iter().map(|(l, r)| (r - l).abs()).sum::<i32>();
 
-    println!("p1 sum: {}", sum);
+    println!("p1 sum for {} -> {}", input, sum);
 }
 
 //--------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ fn p2(input: &str) {
         sum += nb_matches * l;
     }
 
-    println!("p2 sum: {}", sum);
+    println!("p2 sum for {} -> {}", input, sum);
 }
 
 //--------------------------------------------------------------------------------
