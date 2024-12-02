@@ -12,7 +12,7 @@ fn parse_line(line: &str) -> Vec<i32> {
         .collect::<Vec<_>>()
 }
 
-fn is_safe(line: &Vec<i32>) -> bool {
+fn is_safe_p1(line: &Vec<i32>) -> bool {
     let &[v1, v2] = line.array_chunks::<2>().next().unwrap();
     let is_going_up = (v2 - v1) > 0;
 
@@ -33,7 +33,11 @@ fn is_safe(line: &Vec<i32>) -> bool {
 fn p1(input: &str) {
     let file_content = fs::read_to_string(input).expect("cannot read sample file");
 
-    let nb_safe = file_content.lines().map(parse_line).filter(is_safe).count();
+    let nb_safe = file_content
+        .lines()
+        .map(parse_line)
+        .filter(is_safe_p1)
+        .count();
 
     println!("p1 sum for {} -> {}", input, nb_safe);
 }
@@ -42,19 +46,30 @@ fn p1(input: &str) {
 // p2
 //--------------------------------------------------------------------------------
 
-// fn p2(input: &str) {
-//     let file_content = fs::read_to_string(input).expect("cannot read sample file");
-//
-//     let (left, right): (Vec<i32>, Vec<i32>) = file_content.lines().map(parse_line).unzip();
-//     let mut sum = 0;
-//     for l in left.iter() {
-//         // not super optimized, but it works
-//         let nb_matches: i32 = right.iter().filter(|r| *r == l).count() as i32;
-//         sum += nb_matches * l;
-//     }
-//
-//     println!("p2 sum for {} -> {}", input, sum);
-// }
+fn line_without_idx(line: &Vec<i32>, i: usize) -> Vec<i32> {
+    line.iter()
+        .enumerate()
+        .filter_map(|(idx, &v)| if idx != i { Some(v) } else { None })
+        .collect()
+}
+
+fn is_safe_p2(line: &Vec<i32>) -> bool {
+    (0..line.len())
+        .map(|i| line_without_idx(line, i))
+        .any(|modified_line| is_safe_p1(&modified_line))
+}
+
+fn p2(input: &str) {
+    let file_content = fs::read_to_string(input).expect("cannot read sample file");
+
+    let nb_safe = file_content
+        .lines()
+        .map(parse_line)
+        .filter(is_safe_p2)
+        .count();
+
+    println!("p2 sum for {} -> {}", input, nb_safe);
+}
 
 //--------------------------------------------------------------------------------
 // main
@@ -63,6 +78,6 @@ fn p1(input: &str) {
 fn main() {
     p1("sample.txt");
     p1("input.txt");
-    // p2("sample.txt");
-    // p2("input.txt");
+    p2("sample.txt");
+    p2("input.txt");
 }
