@@ -11,8 +11,8 @@ fn parse_line(line: &str) -> (i32, i32) {
         .split_ascii_whitespace()
         .map(|x| x.parse::<i32>().unwrap())
         .collect::<Vec<_>>();
-    let [l, r] = vals.array_chunks::<2>().next().unwrap();
-    (*l, *r)
+    let &[l, r] = vals.array_chunks::<2>().next().unwrap();
+    (l, r)
 }
 
 fn p1(input: &str) {
