@@ -6,8 +6,7 @@ use std::fs;
 
 fn parse_line(line: &str) -> (i32, i32) {
     let vals = line
-        .split(" ")
-        .filter(|x| x.len() > 0)
+        .split_ascii_whitespace()
         .map(|x| x.parse::<i32>().unwrap())
         .collect::<Vec<_>>();
     let [l, r, ..] = vals.as_slice() else {
