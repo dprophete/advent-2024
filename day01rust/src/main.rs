@@ -1,3 +1,5 @@
+#![feature(array_chunks)]
+
 use std::fs;
 
 //--------------------------------------------------------------------------------
@@ -9,9 +11,7 @@ fn parse_line(line: &str) -> (i32, i32) {
         .split_ascii_whitespace()
         .map(|x| x.parse::<i32>().unwrap())
         .collect::<Vec<_>>();
-    let [l, r, ..] = vals.as_slice() else {
-        panic!("invalid input")
-    };
+    let [l, r] = vals.array_chunks::<2>().next().unwrap();
     (*l, *r)
 }
 
