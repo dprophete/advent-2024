@@ -7,4 +7,4 @@ For reference, [last year](https://github.com/dprophete/advent-2023) I started u
 
 ## running
 
-You should be able to go into any dir, and simply `cargo run`
+You should be able to cd into any dir, and simply `cargo run`
