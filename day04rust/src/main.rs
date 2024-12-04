@@ -1,9 +1,9 @@
-#![feature(array_chunks)]
 #![allow(dead_code)]
 
 use std::fs;
 
-fn bool_to_int(b: bool) -> u16 {
+// false -> 0, true -> 1
+fn bool_to_u16(b: bool) -> u16 {
     b as u16
 }
 
@@ -49,7 +49,7 @@ impl Matrix {
 impl Matrix {
     // check if MAS is at (x, y) in the dir (dx, dy)
     fn is_mas_in_dir(&self, x: i32, y: i32, dx: i32, dy: i32) -> u16 {
-        bool_to_int(
+        bool_to_u16(
             self.get(x + dx, y + dy) == 'M'
                 && self.get(x + 2 * dx, y + 2 * dy) == 'A'
                 && self.get(x + 3 * dx, y + 3 * dy) == 'S',
@@ -108,6 +108,7 @@ impl Matrix {
             && (self.is_ms_in_dir(x, y, -1, 1) || self.is_ms_in_dir(x, y, 1, -1))
     }
 }
+
 fn p2(input: &str) {
     let file_content = fs::read_to_string(input).expect("cannot read sample file");
     let matrix = Matrix::from_file_content(file_content.as_str());
@@ -116,7 +117,7 @@ fn p2(input: &str) {
     let mut sum = 0;
     for y in 0..size {
         for x in 0..size {
-            sum += bool_to_int(matrix.is_x_dash_mas_at_point(x, y))
+            sum += bool_to_u16(matrix.is_x_dash_mas_at_point(x, y))
         }
     }
 
