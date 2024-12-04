@@ -29,39 +29,29 @@ impl Matrix {
     }
 }
 
-// xmas matrix extension
+// part matrix extension
 impl Matrix {
-    // return 4 chars in a given direction
-    fn chars_in_dir(&self, x: i32, y: i32, dx: i32, dy: i32) -> (char, char, char) {
-        (
-            self.get(x + dx, y + dy),
-            self.get(x + 2 * dx, y + 2 * dy),
-            self.get(x + 3 * dx, y + 3 * dy),
-        )
+    // note: bool as u16 -> 0 or 1
+    fn is_mas_in_dir(&self, x: i32, y: i32, dx: i32, dy: i32) -> u16 {
+        (self.get(x + dx, y + dy) == 'M'
+            && self.get(x + 2 * dx, y + 2 * dy) == 'A'
+            && self.get(x + 3 * dx, y + 3 * dy) == 'S') as u16
     }
 
-    fn check_in_dir(&self, x: i32, y: i32, dx: i32, dy: i32) -> i32 {
-        if is_mas(self.chars_in_dir(x, y, dx, dy)) {
-            1
-        } else {
-            0
-        }
-    }
-
-    fn check_at_point(&self, x: i32, y: i32) -> i32 {
+    fn nb_xmas_at_point(&self, x: i32, y: i32) -> u16 {
         // short circuit
         if self.get(x, y) != 'X' {
             return 0;
         }
         // we check clockwise, starting from the top
-        self.check_in_dir(x, y, 0, -1)
-            + self.check_in_dir(x, y, 1, -1)
-            + self.check_in_dir(x, y, 1, 0)
-            + self.check_in_dir(x, y, 1, 1)
-            + self.check_in_dir(x, y, 0, 1)
-            + self.check_in_dir(x, y, -1, 1)
-            + self.check_in_dir(x, y, -1, 0)
-            + self.check_in_dir(x, y, -1, -1)
+        self.is_mas_in_dir(x, y, 0, -1)
+            + self.is_mas_in_dir(x, y, 1, -1)
+            + self.is_mas_in_dir(x, y, 1, 0)
+            + self.is_mas_in_dir(x, y, 1, 1)
+            + self.is_mas_in_dir(x, y, 0, 1)
+            + self.is_mas_in_dir(x, y, -1, 1)
+            + self.is_mas_in_dir(x, y, -1, 0)
+            + self.is_mas_in_dir(x, y, -1, -1)
     }
 }
 
@@ -83,7 +73,7 @@ fn p1(input: &str) {
     let mut sum = 0;
     for y in 0..size {
         for x in 0..size {
-            sum += matrix.check_at_point(x, y)
+            sum += matrix.nb_xmas_at_point(x, y)
         }
     }
 
