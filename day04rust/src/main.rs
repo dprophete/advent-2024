@@ -3,8 +3,12 @@
 
 use std::fs;
 
+fn bool_to_int(b: bool) -> u16 {
+    b as u16
+}
+
 //--------------------------------------------------------------------------------
-// p1
+// matrix
 //--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone)]
@@ -20,6 +24,14 @@ impl Matrix {
         Matrix { matrix, size }
     }
 
+    fn from_file_content(file_content: &str) -> Matrix {
+        let matrix: Vec<Vec<char>> = file_content
+            .lines()
+            .map(|line| line.chars().collect())
+            .collect();
+        Matrix::new(matrix)
+    }
+
     // return char at x, y or '.' if out of bounds
     fn get(&self, x: i32, y: i32) -> char {
         if x < 0 || y < 0 || x >= self.size || y >= self.size {
@@ -29,13 +41,19 @@ impl Matrix {
     }
 }
 
-// part matrix extension
+//--------------------------------------------------------------------------------
+// p1
+//--------------------------------------------------------------------------------
+
+// part1 matrix extension
 impl Matrix {
-    // note: bool as u16 -> 0 or 1
+    // check if MAS is at (x, y) in the dir (dx, dy)
     fn is_mas_in_dir(&self, x: i32, y: i32, dx: i32, dy: i32) -> u16 {
-        (self.get(x + dx, y + dy) == 'M'
-            && self.get(x + 2 * dx, y + 2 * dy) == 'A'
-            && self.get(x + 3 * dx, y + 3 * dy) == 'S') as u16
+        bool_to_int(
+            self.get(x + dx, y + dy) == 'M'
+                && self.get(x + 2 * dx, y + 2 * dy) == 'A'
+                && self.get(x + 3 * dx, y + 3 * dy) == 'S',
+        )
     }
 
     fn nb_xmas_at_point(&self, x: i32, y: i32) -> u16 {
@@ -55,19 +73,9 @@ impl Matrix {
     }
 }
 
-// check if 3 chars are MAS
-fn is_mas((m, a, s): (char, char, char)) -> bool {
-    m == 'M' && a == 'A' && s == 'S'
-}
-
 fn p1(input: &str) {
     let file_content = fs::read_to_string(input).expect("cannot read sample file");
-
-    let chars: Vec<Vec<char>> = file_content
-        .lines()
-        .map(|line| line.chars().collect())
-        .collect();
-    let matrix = Matrix::new(chars);
+    let matrix = Matrix::from_file_content(file_content.as_str());
     let size: i32 = matrix.size;
 
     let mut sum = 0;
@@ -84,27 +92,36 @@ fn p1(input: &str) {
 // p2
 //--------------------------------------------------------------------------------
 
-// fn p2(input: &str) {
-//     let file_content = fs::read_to_string(input).expect("cannot read sample file");
-//
-//     let re = Regex::new(r"mul\(([1-9]\d{0,2}),([1-9]\d{0,2})\)|do\(\)|don't\(\)").unwrap();
-//
-//     let mut enabled = true;
-//     let mut sum = 0;
-//     re.captures_iter(&file_content).for_each(|caps| {
-//         if caps[0].to_string() == "do()" {
-//             enabled = true
-//         } else if caps[0].to_string() == "don't()" {
-//             enabled = false
-//         } else if enabled {
-//             let n1 = caps[1].parse::<u32>().unwrap();
-//             let n2 = caps[2].parse::<u32>().unwrap();
-//             sum += n1 * n2
-//         }
-//     });
-//
-//     println!("p2 sum for {} -> {}", input, sum);
-// }
+// part2 matrix extension
+impl Matrix {
+    // check if M-S is around (x, y) in the dir (dx, dy)
+    fn is_ms_in_dir(&self, x: i32, y: i32, dx: i32, dy: i32) -> bool {
+        self.get(x - dx, y - dy) == 'M' && self.get(x + dx, y + dy) == 'S'
+    }
+
+    fn is_x_dash_mas_at_point(&self, x: i32, y: i32) -> bool {
+        // short circuit
+        if self.get(x, y) != 'A' {
+            return false;
+        }
+        (self.is_ms_in_dir(x, y, 1, 1) || self.is_ms_in_dir(x, y, -1, -1))
+            && (self.is_ms_in_dir(x, y, -1, 1) || self.is_ms_in_dir(x, y, 1, -1))
+    }
+}
+fn p2(input: &str) {
+    let file_content = fs::read_to_string(input).expect("cannot read sample file");
+    let matrix = Matrix::from_file_content(file_content.as_str());
+    let size: i32 = matrix.size;
+
+    let mut sum = 0;
+    for y in 0..size {
+        for x in 0..size {
+            sum += bool_to_int(matrix.is_x_dash_mas_at_point(x, y))
+        }
+    }
+
+    println!("p1 sum for {} -> {}", input, sum);
+}
 
 //--------------------------------------------------------------------------------
 // main
@@ -113,6 +130,6 @@ fn p1(input: &str) {
 fn main() {
     p1("sample.txt");
     p1("input.txt");
-    // p2("sample2.txt");
-    // p2("input.txt");
+    p2("sample.txt");
+    p2("input.txt");
 }
