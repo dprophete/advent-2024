@@ -18,12 +18,12 @@ fn parse_file(file_content: &str) -> (Rules, Updates) {
     let rules: Rules = first
         .lines()
         .map(|line| line.split_once("|").unwrap())
-        .map(|(a, b)| (a.parse::<i32>().unwrap(), b.parse::<i32>().unwrap()))
+        .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
         .collect();
 
     let updates: Updates = second
         .lines()
-        .map(|line| line.split(",").map(|x| x.parse::<i32>().unwrap()).collect())
+        .map(|line| line.split(",").map(|x| x.parse().unwrap()).collect())
         .collect();
 
     (rules, updates)
