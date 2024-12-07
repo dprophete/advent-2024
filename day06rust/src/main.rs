@@ -25,28 +25,28 @@ fn format_d(duration: std::time::Duration) -> String {
 
 #[derive(Debug, Clone)]
 enum Direction {
-    UP,
-    DOWN,
-    LEFT,
-    RIGHT,
+    Up,
+    Down,
+    Left,
+    Right,
 }
 
 impl Direction {
     fn rot_right(&self) -> Direction {
         match self {
-            Direction::UP => Direction::RIGHT,
-            Direction::RIGHT => Direction::DOWN,
-            Direction::DOWN => Direction::LEFT,
-            Direction::LEFT => Direction::UP,
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
         }
     }
 
     fn to_v2(&self) -> V2 {
         match self {
-            Direction::UP => (0, -1),
-            Direction::DOWN => (0, 1),
-            Direction::LEFT => (-1, 0),
-            Direction::RIGHT => (1, 0),
+            Direction::Up => (0, -1),
+            Direction::Down => (0, 1),
+            Direction::Left => (-1, 0),
+            Direction::Right => (1, 0),
         }
     }
 }
@@ -81,7 +81,7 @@ impl Matrix {
         if x < 0 || y < 0 || x >= self.size || y >= self.size {
             return None;
         }
-        return Some(self.matrix[y as usize][x as usize]);
+        Some(self.matrix[y as usize][x as usize])
     }
 
     fn set(&mut self, (x, y): V2, c: char) -> &mut Self {
@@ -99,7 +99,7 @@ impl Display for Matrix {
             for x in 0..self.size {
                 write!(f, "{}", self.get((x, y)).unwrap_or('*'))?;
             }
-            write!(f, "\n")?;
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -118,7 +118,7 @@ impl Matrix {
                 }
             }
         }
-        return (-1, -1);
+        (-1, -1)
     }
 }
 
@@ -133,7 +133,7 @@ fn p1(input: &str) {
     let mut matrix = Matrix::from_file_content(file_content.as_str());
 
     let mut pos = matrix.find_start();
-    let mut dir = Direction::UP;
+    let mut dir = Direction::Up;
     let mut sum = 1;
     loop {
         let nx = move_to_dir(pos, &dir);
@@ -162,7 +162,7 @@ fn p1(input: &str) {
 fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
     let mut pos = start;
     let mut times_at_pos = HashMap::new();
-    let mut dir = Direction::UP;
+    let mut dir = Direction::Up;
     loop {
         let nx = move_to_dir(pos, &dir);
         match matrix.get(nx) {
@@ -188,7 +188,7 @@ fn p2(input: &str) {
     let start = matrix.find_start();
     let mut sum = 0;
 
-    let mut dir = Direction::UP;
+    let mut dir = Direction::Up;
     let mut pos = start;
 
     loop {
@@ -220,5 +220,5 @@ fn main() {
     p1("sample.txt");
     p1("input.txt");
     p2("sample.txt");
-    p2("input.txt");
+    // p2("input.txt");
 }

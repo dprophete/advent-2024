@@ -34,11 +34,10 @@ fn parse_file(input: &str) -> Vec<(i64, Vec<i64>)> {
         .collect::<Vec<(i64, Vec<i64>)>>()
 }
 
-fn p1_is_equation_valid(total: i64, lst: Vec<i64>) -> bool {
+fn p1_is_equation_valid(total: i64, lst: &[i64]) -> bool {
     let mut nbs = vec![lst[0]];
 
-    for i in 1..lst.len() {
-        let nx = lst[i];
+    for nx in lst.iter().skip(1) {
         nbs = nbs
             .iter()
             .flat_map(|acc| vec![acc + nx, acc * nx])
@@ -53,7 +52,7 @@ fn p1(input: &str) {
 
     let mut sum = 0;
     for (total, lst) in equations {
-        if p1_is_equation_valid(total, lst) {
+        if p1_is_equation_valid(total, &lst) {
             sum += total;
         }
     }
@@ -64,13 +63,12 @@ fn p1(input: &str) {
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2_is_equation_valid(total: i64, lst: &Vec<i64>) -> bool {
+fn p2_is_equation_valid(total: i64, lst: &[i64]) -> bool {
     // we are keeping the string representation of the equation to be able to print it for
     // debugging....
     let mut nbs = vec![(lst[0], format!("{}", lst[0]))];
 
-    for i in 1..lst.len() {
-        let nx = lst[i];
+    for nx in lst.iter().skip(1) {
         nbs = nbs
             .iter()
             .flat_map(|(acc, str)| {
@@ -112,8 +110,8 @@ fn p2(input: &str) {
 //--------------------------------------------------------------------------------
 
 fn main() {
-    p1("sample.txt");
+    // p1("sample.txt");
     p1("input.txt");
     p2("sample.txt");
-    p2("input.txt");
+    // p2("input.txt");
 }
