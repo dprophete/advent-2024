@@ -1,10 +1,24 @@
 #![allow(dead_code)]
+#![feature(duration_millis_float)]
 
 use std::collections::HashMap;
 use std::fmt::{self, Display};
 use std::fs;
+use std::time::Instant;
 
 type V2 = (i32, i32);
+
+fn format_d(duration: std::time::Duration) -> String {
+    if duration.as_secs() > 0 {
+        format!("{:.2}s", duration.as_secs_f64())
+    } else if duration.as_millis() > 0 {
+        format!("{}ms", duration.as_millis())
+    } else if duration.as_micros() > 0 {
+        format!("{}µs", duration.as_micros())
+    } else {
+        format!("{}ns", duration.as_nanos())
+    }
+}
 
 //--------------------------------------------------------------------------------
 // direction
@@ -109,12 +123,13 @@ impl Matrix {
     }
 }
 
-fn move1((x, y): V2, dir: &Direction) -> V2 {
+fn move_to_dir((x, y): V2, dir: &Direction) -> V2 {
     let (vx, vy) = dir.to_v2();
     (x + vx, y + vy)
 }
 
 fn p1(input: &str) {
+    let start_t = Instant::now();
     let file_content = fs::read_to_string(input).expect("cannot read sample file");
     let mut matrix = Matrix::from_file_content(file_content.as_str());
 
@@ -122,7 +137,7 @@ fn p1(input: &str) {
     let mut dir = Direction::UP;
     let mut sum = 1;
     loop {
-        let nx = move1(pos, &dir);
+        let nx = move_to_dir(pos, &dir);
         match matrix.get(nx) {
             None => break,
             Some('#') => dir = dir.rot_right(),
@@ -135,7 +150,7 @@ fn p1(input: &str) {
         }
     }
 
-    println!("p1 steps for {} -> {}", input, sum);
+    println!("[{}] p1 {} -> {}", format_d(start_t.elapsed()), input, sum);
 }
 
 //--------------------------------------------------------------------------------
@@ -143,23 +158,23 @@ fn p1(input: &str) {
 //--------------------------------------------------------------------------------
 
 // we figure out we are in a loop when we visit the same position 5 times
-// (if it's 5 times, we are sure that for 2 of these we were going intot the same direction)
+// (if it's 5 times, we are sure that for 2 of these we were going into the same direction)
 // I know, I know, it's not optimized but it's rust ;-)
 fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
     let mut pos = start;
     let mut times_at_pos = HashMap::new();
     let mut dir = Direction::UP;
     loop {
-        let nx = move1(pos, &dir);
+        let nx = move_to_dir(pos, &dir);
         match matrix.get(nx) {
             None => return false,
             Some('#') | Some('O') => dir = dir.rot_right(),
             _ => {
                 let current = *times_at_pos.get(&pos).unwrap_or(&0);
-                if current == 4 {
+                times_at_pos.insert(pos, current + 1);
+                if current == 5 {
                     return true;
                 }
-                times_at_pos.insert(pos, current + 1);
                 pos = nx;
             }
         }
@@ -167,6 +182,7 @@ fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
 }
 
 fn p2(input: &str) {
+    let start_t = Instant::now();
     let file_content = fs::read_to_string(input).expect("cannot read sample file");
     let mut matrix = Matrix::from_file_content(file_content.as_str());
 
@@ -177,7 +193,7 @@ fn p2(input: &str) {
     let mut pos = start;
 
     loop {
-        let nx = move1(pos, &dir);
+        let nx = move_to_dir(pos, &dir);
         match matrix.get(nx) {
             None => break,
             Some('#') => dir = dir.rot_right(),
@@ -194,7 +210,7 @@ fn p2(input: &str) {
         }
     }
 
-    println!("p2 obstructions for {} -> {}", input, sum);
+    println!("[{}] p2 {} -> {}", format_d(start_t.elapsed()), input, sum);
 }
 
 //--------------------------------------------------------------------------------
