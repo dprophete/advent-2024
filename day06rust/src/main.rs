@@ -220,5 +220,5 @@ fn main() {
     p1("sample.txt");
     p1("input.txt");
     p2("sample.txt");
-    // p2("input.txt");
+    p2("input.txt");
 }
