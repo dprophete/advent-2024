@@ -37,7 +37,7 @@ impl Matrix {
         if x < 0 || y < 0 || x >= self.size || y >= self.size {
             return '.';
         }
-        return self.matrix[y as usize][x as usize];
+        self.matrix[y as usize][x as usize]
     }
 }
 
