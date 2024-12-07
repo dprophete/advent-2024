@@ -65,6 +65,8 @@ fn p1(input: &str) {
 //--------------------------------------------------------------------------------
 
 fn p2_is_equation_valid(total: i64, lst: &Vec<i64>) -> bool {
+    // we are keeping the string representation of the equation to be able to print it for
+    // debugging....
     let mut nbs = vec![(lst[0], format!("{}", lst[0]))];
 
     for i in 1..lst.len() {
