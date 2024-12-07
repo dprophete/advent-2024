@@ -2,7 +2,9 @@
 
 use std::fs;
 
-use itertools::Itertools;
+fn toi64(s: &str) -> i64 {
+    s.parse::<i64>().unwrap()
+}
 
 //--------------------------------------------------------------------------------
 // p1
@@ -15,12 +17,7 @@ fn parse_file(input: &str) -> Vec<(i64, Vec<i64>)> {
         .lines()
         .map(|line| {
             let (lhs, rhs) = line.split_once(": ").unwrap();
-            (
-                lhs.parse::<i64>().unwrap(),
-                rhs.split(" ")
-                    .map(|x| x.parse::<i64>().unwrap())
-                    .collect::<Vec<i64>>(),
-            )
+            (toi64(lhs), rhs.split(" ").map(toi64).collect::<Vec<i64>>())
         })
         .collect::<Vec<(i64, Vec<i64>)>>()
 }
@@ -33,13 +30,9 @@ fn p1_is_equation_valid(total: i64, lst: Vec<i64>) -> bool {
         nbs = nbs
             .iter()
             .flat_map(|acc| vec![acc + nx, acc * nx])
-            .take_while_inclusive(|&x| x != total)
             .collect();
-        if *nbs.last().unwrap() == total {
-            return true;
-        }
     }
-    false
+    nbs.contains(&total)
 }
 
 fn p1(input: &str) {
@@ -58,23 +51,28 @@ fn p1(input: &str) {
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2_is_equation_valid(total: i64, lst: Vec<i64>) -> bool {
-    let mut nbs = vec![lst[0]];
+fn p2_is_equation_valid(total: i64, lst: &Vec<i64>) -> bool {
+    let mut nbs = vec![(lst[0], format!("{}", lst[0]))];
 
     for i in 1..lst.len() {
         let nx = lst[i];
         nbs = nbs
             .iter()
-            .flat_map(|acc| {
+            .flat_map(|(acc, str)| {
                 vec![
-                    acc + nx,
-                    acc * nx,
-                    format!("{}{}", acc, nx).parse::<i64>().unwrap(),
+                    (acc + nx, format!("{} + {}", str, nx)),
+                    (acc * nx, format!("{} * {}", str, nx)),
+                    (
+                        toi64(&format!("{}{}", acc, nx)),
+                        format!("{} || {}", str, nx),
+                    ),
                 ]
             })
-            .take_while_inclusive(|&x| x != total)
             .collect();
-        if *nbs.last().unwrap() == total {
+    }
+    for (acc, str) in nbs.iter() {
+        if *acc == total {
+            println!("{} = {}", acc, str);
             return true;
         }
     }
@@ -86,7 +84,7 @@ fn p2(input: &str) {
 
     let mut sum = 0;
     for (total, lst) in equations {
-        if p2_is_equation_valid(total, lst) {
+        if p2_is_equation_valid(total, &lst) {
             sum += total;
         }
     }
@@ -98,8 +96,8 @@ fn p2(input: &str) {
 //--------------------------------------------------------------------------------
 
 fn main() {
-    // p1("sample.txt");
-    // p1("input.txt");
+    p1("sample.txt");
+    p1("input.txt");
     p2("sample.txt");
-    p2("input.txt");
+    // p2("input.txt");
 }
