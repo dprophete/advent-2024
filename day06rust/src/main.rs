@@ -5,10 +5,38 @@ use std::fmt::{self, Display};
 use std::fs;
 
 type V2 = (i32, i32);
-const LEFT: V2 = (-1, 0);
-const RIGHT: V2 = (1, 0);
-const UP: V2 = (0, -1);
-const DOWN: V2 = (0, 1);
+
+//--------------------------------------------------------------------------------
+// direction
+//--------------------------------------------------------------------------------
+
+#[derive(Debug, Clone)]
+enum Direction {
+    UP,
+    DOWN,
+    LEFT,
+    RIGHT,
+}
+
+impl Direction {
+    fn rot_right(&self) -> Direction {
+        match self {
+            Direction::UP => Direction::RIGHT,
+            Direction::RIGHT => Direction::DOWN,
+            Direction::DOWN => Direction::LEFT,
+            Direction::LEFT => Direction::UP,
+        }
+    }
+
+    fn to_v2(&self) -> V2 {
+        match self {
+            Direction::UP => (0, -1),
+            Direction::DOWN => (0, 1),
+            Direction::LEFT => (-1, 0),
+            Direction::RIGHT => (1, 0),
+        }
+    }
+}
 
 //--------------------------------------------------------------------------------
 // matrix
@@ -81,18 +109,9 @@ impl Matrix {
     }
 }
 
-fn move1((x, y): V2, (vx, vy): V2) -> V2 {
+fn move1((x, y): V2, dir: &Direction) -> V2 {
+    let (vx, vy) = dir.to_v2();
     (x + vx, y + vy)
-}
-
-fn rot_right((vx, vy): V2) -> V2 {
-    match (vx, vy) {
-        UP => RIGHT,
-        RIGHT => DOWN,
-        DOWN => LEFT,
-        LEFT => UP,
-        _ => panic!("invalid direction"),
-    }
 }
 
 fn p1(input: &str) {
@@ -100,13 +119,13 @@ fn p1(input: &str) {
     let mut matrix = Matrix::from_file_content(file_content.as_str());
 
     let mut pos = matrix.find_start();
-    let mut dir = UP;
+    let mut dir = Direction::UP;
     let mut sum = 1;
     loop {
-        let nx = move1(pos, dir);
+        let nx = move1(pos, &dir);
         match matrix.get(nx) {
             None => break,
-            Some('#') => dir = rot_right(dir),
+            Some('#') => dir = dir.rot_right(),
             Some('.') => {
                 pos = nx;
                 matrix.set(pos, 'X'); // so we can remember where we've been here
@@ -129,12 +148,12 @@ fn p1(input: &str) {
 fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
     let mut pos = start;
     let mut times_at_pos = HashMap::new();
-    let mut dir = UP;
+    let mut dir = Direction::UP;
     loop {
-        let nx = move1(pos, dir);
+        let nx = move1(pos, &dir);
         match matrix.get(nx) {
             None => return false,
-            Some('#') | Some('O') => dir = rot_right(dir),
+            Some('#') | Some('O') => dir = dir.rot_right(),
             _ => {
                 let current = *times_at_pos.get(&pos).unwrap_or(&0);
                 if current == 4 {
@@ -154,14 +173,14 @@ fn p2(input: &str) {
     let start = matrix.find_start();
     let mut sum = 0;
 
-    let mut dir = UP;
+    let mut dir = Direction::UP;
     let mut pos = start;
 
     loop {
-        let nx = move1(pos, dir);
+        let nx = move1(pos, &dir);
         match matrix.get(nx) {
             None => break,
-            Some('#') => dir = rot_right(dir),
+            Some('#') => dir = dir.rot_right(),
             Some('.') => {
                 // let's try to put an obstacle here and see if we are in a loop...
                 pos = nx;
