@@ -8,6 +8,10 @@ type Rules = Vec<Rule>;
 type Update = Vec<i32>;
 type Updates = Vec<Update>;
 
+fn toi32(s: &str) -> i32 {
+    s.parse::<i32>().unwrap()
+}
+
 //--------------------------------------------------------------------------------
 // p1
 //--------------------------------------------------------------------------------
@@ -18,12 +22,12 @@ fn parse_file(file_content: &str) -> (Rules, Updates) {
     let rules: Rules = first
         .lines()
         .map(|line| line.split_once("|").unwrap())
-        .map(|(a, b)| (a.parse::<i32>().unwrap(), b.parse::<i32>().unwrap()))
+        .map(|(a, b)| (toi32(a), toi32(b)))
         .collect();
 
     let updates: Updates = second
         .lines()
-        .map(|line| line.split(",").map(|x| x.parse::<i32>().unwrap()).collect())
+        .map(|line| line.split(",").map(toi32).collect())
         .collect();
 
     (rules, updates)
