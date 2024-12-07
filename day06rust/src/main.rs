@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-#![feature(duration_millis_float)]
 
 use std::collections::HashMap;
 use std::fmt::{self, Display};

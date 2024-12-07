@@ -1,9 +1,21 @@
 #![allow(dead_code)]
 
-use std::fs;
+use std::{fs, time::Instant};
 
 fn toi64(s: &str) -> i64 {
     s.parse::<i64>().unwrap()
+}
+
+fn format_d(duration: std::time::Duration) -> String {
+    if duration.as_secs() > 0 {
+        format!("{:.2}s", duration.as_secs_f64())
+    } else if duration.as_millis() > 0 {
+        format!("{}ms", duration.as_millis())
+    } else if duration.as_micros() > 0 {
+        format!("{}µs", duration.as_micros())
+    } else {
+        format!("{}ns", duration.as_nanos())
+    }
 }
 
 //--------------------------------------------------------------------------------
@@ -36,6 +48,7 @@ fn p1_is_equation_valid(total: i64, lst: Vec<i64>) -> bool {
 }
 
 fn p1(input: &str) {
+    let start_t = Instant::now();
     let equations = parse_file(input);
 
     let mut sum = 0;
@@ -44,7 +57,7 @@ fn p1(input: &str) {
             sum += total;
         }
     }
-    println!("p1 sum for {} -> {}", input, sum);
+    println!("[{}] p1 {} -> {}", format_d(start_t.elapsed()), input, sum);
 }
 
 //--------------------------------------------------------------------------------
@@ -80,6 +93,7 @@ fn p2_is_equation_valid(total: i64, lst: &Vec<i64>) -> bool {
 }
 
 fn p2(input: &str) {
+    let start_t = Instant::now();
     let equations = parse_file(input);
 
     let mut sum = 0;
@@ -88,7 +102,7 @@ fn p2(input: &str) {
             sum += total;
         }
     }
-    println!("p2 sum for {} -> {}", input, sum);
+    println!("[{}] p2 {} -> {}", format_d(start_t.elapsed()), input, sum);
 }
 
 //--------------------------------------------------------------------------------
@@ -99,5 +113,5 @@ fn main() {
     p1("sample.txt");
     p1("input.txt");
     p2("sample.txt");
-    // p2("input.txt");
+    p2("input.txt");
 }
