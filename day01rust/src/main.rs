@@ -1,16 +1,14 @@
 #![feature(array_chunks)]
 
 use std::fs;
+use utils::toi32;
 
 //--------------------------------------------------------------------------------
 // p1
 //--------------------------------------------------------------------------------
 
 fn parse_line(line: &str) -> (i32, i32) {
-    let vals = line
-        .split_ascii_whitespace()
-        .map(|x| x.parse::<i32>().unwrap())
-        .collect::<Vec<_>>();
+    let vals = line.split_ascii_whitespace().map(toi32).collect::<Vec<_>>();
     let &[l, r] = vals.array_chunks::<2>().next().unwrap();
     (l, r)
 }

@@ -1,7 +1,22 @@
 #![allow(dead_code)]
 
 use std::{fs, time::Instant};
-use utils::{fmt_d, toi64};
+
+fn toi64(s: &str) -> i64 {
+    s.parse::<i64>().unwrap()
+}
+
+fn format_d(duration: std::time::Duration) -> String {
+    if duration.as_secs() > 0 {
+        format!("{:.2}s", duration.as_secs_f64())
+    } else if duration.as_millis() > 0 {
+        format!("{}ms", duration.as_millis())
+    } else if duration.as_micros() > 0 {
+        format!("{}µs", duration.as_micros())
+    } else {
+        format!("{}ns", duration.as_nanos())
+    }
+}
 
 //--------------------------------------------------------------------------------
 // p1
@@ -41,7 +56,7 @@ fn p1(input: &str) {
             sum += total;
         }
     }
-    println!("[{}] p1 {} -> {}", fmt_d(start_t.elapsed()), input, sum);
+    println!("[{}] p1 {} -> {}", format_d(start_t.elapsed()), input, sum);
 }
 
 //--------------------------------------------------------------------------------
@@ -87,7 +102,7 @@ fn p2(input: &str) {
             sum += total;
         }
     }
-    println!("[{}] p2 {} -> {}", fmt_d(start_t.elapsed()), input, sum);
+    println!("[{}] p2 {} -> {}", format_d(start_t.elapsed()), input, sum);
 }
 
 //--------------------------------------------------------------------------------
@@ -95,8 +110,8 @@ fn p2(input: &str) {
 //--------------------------------------------------------------------------------
 
 fn main() {
-    p1("sample.txt");
+    // p1("sample.txt");
     p1("input.txt");
     p2("sample.txt");
-    p2("input.txt");
+    // p2("input.txt");
 }

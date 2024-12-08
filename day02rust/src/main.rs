@@ -1,15 +1,15 @@
 #![feature(array_chunks)]
 #![allow(dead_code)]
+
 use std::fs;
+use utils::toi32;
 
 //--------------------------------------------------------------------------------
 // p1
 //--------------------------------------------------------------------------------
 
 fn parse_line(line: &str) -> Vec<i32> {
-    line.split_ascii_whitespace()
-        .map(|x| x.parse::<i32>().unwrap())
-        .collect::<Vec<_>>()
+    line.split_ascii_whitespace().map(toi32).collect::<Vec<_>>()
 }
 
 fn is_safe_p1(line: &Vec<i32>) -> bool {

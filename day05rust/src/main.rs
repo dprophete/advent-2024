@@ -3,14 +3,12 @@
 
 use std::{cmp::Ordering, fs};
 
+use utils::toi32;
+
 type Rule = (i32, i32);
 type Rules = Vec<Rule>;
 type Update = Vec<i32>;
 type Updates = Vec<Update>;
-
-fn toi32(s: &str) -> i32 {
-    s.parse::<i32>().unwrap()
-}
 
 //--------------------------------------------------------------------------------
 // p1

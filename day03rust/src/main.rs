@@ -3,6 +3,7 @@
 
 use regex::Regex;
 use std::fs;
+use utils::tou32;
 
 //--------------------------------------------------------------------------------
 // p1
@@ -16,8 +17,8 @@ fn p1(input: &str) {
     let sum = re
         .captures_iter(&file_content)
         .map(|caps| {
-            let n1 = caps[1].parse::<u32>().unwrap();
-            let n2 = caps[2].parse::<u32>().unwrap();
+            let n1 = tou32(&caps[1]);
+            let n2 = tou32(&caps[2]);
             n1 * n2
         })
         .sum::<u32>();
@@ -42,8 +43,8 @@ fn p2(input: &str) {
         } else if caps[0].to_string() == "don't()" {
             enabled = false
         } else if enabled {
-            let n1 = caps[1].parse::<u32>().unwrap();
-            let n2 = caps[2].parse::<u32>().unwrap();
+            let n1 = tou32(&caps[1]);
+            let n2 = tou32(&caps[2]);
             sum += n1 * n2
         }
     });
