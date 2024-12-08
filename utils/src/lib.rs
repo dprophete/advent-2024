@@ -65,7 +65,7 @@ pub type V3 = (i32, i32, i32);
 // direction
 //--------------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub enum Direction {
     Up,
     Down,

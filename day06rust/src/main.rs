@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs;
 use std::time::Instant;
 
@@ -50,12 +50,9 @@ fn p1(input: &str) {
 // p2
 //--------------------------------------------------------------------------------
 
-// we figure out we are in a loop when we visit the same position 5 times
-// (if it's 5 times, we are sure that for 2 of these we were going into the same direction)
-// I know, I know, it's not optimized but it's rust ;-)
 fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
     let mut pos = start;
-    let mut times_at_pos = HashMap::new();
+    let mut times_at_pos = HashSet::new();
     let mut dir = Direction::Up;
     loop {
         let nx = pos.move_to_dir(&dir);
@@ -63,11 +60,10 @@ fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
             None => return false,
             Some('#') | Some('O') => dir = dir.rot_right(),
             _ => {
-                let current = *times_at_pos.get(&pos).unwrap_or(&0);
-                times_at_pos.insert(pos, current + 1);
-                if current == 5 {
+                if times_at_pos.contains(&(pos, dir)) {
                     return true;
                 }
+                times_at_pos.insert((pos, dir));
                 pos = nx;
             }
         }
