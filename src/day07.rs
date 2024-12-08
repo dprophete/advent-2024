@@ -1,7 +1,5 @@
-#![allow(dead_code)]
-
+use crate::utils::*;
 use std::{fs, time::Instant};
-use utils::{fmt_d, toi64};
 
 //--------------------------------------------------------------------------------
 // p1
@@ -91,12 +89,12 @@ fn p2(input: &str) {
 }
 
 //--------------------------------------------------------------------------------
-// main
+// run
 //--------------------------------------------------------------------------------
 
-fn main() {
-    p1("sample.txt");
-    p1("input.txt");
-    p2("sample.txt");
-    p2("input.txt");
+pub fn run() {
+    p1("data/07_sample.txt");
+    p1("data/07_input.txt");
+    p2("data/07_sample.txt");
+    // p2("data/07_input.txt");
 }

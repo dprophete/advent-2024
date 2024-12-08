@@ -20,7 +20,7 @@ pub fn tou32(s: &str) -> u32 {
 }
 
 //--------------------------------------------------------------------------------
-// vectors
+// v2
 //--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
@@ -34,8 +34,12 @@ impl V2 {
         V2 { x, y }
     }
 
-    pub fn from_vec(v: &Vec<i32>) -> V2 {
+    pub fn from_vec(v: &[i32]) -> V2 {
         V2::new(v[0], v[1])
+    }
+
+    pub fn times(&self, n: i32) -> V2 {
+        V2::new(self.x * n, self.y * n)
     }
 
     pub fn add(&self, other: &V2) -> V2 {
@@ -46,20 +50,21 @@ impl V2 {
         V2::new(self.x - other.x, self.y - other.y)
     }
 
-    pub fn rot_right(&self) -> V2 {
-        V2::new(self.y, -self.x)
-    }
-
-    pub fn rot_left(&self) -> V2 {
-        V2::new(-self.y, self.x)
-    }
-
     pub fn move_to_dir(&self, dir: &Direction) -> V2 {
         self.add(dir.to_v2())
     }
 }
 
-pub type V3 = (i32, i32, i32);
+//--------------------------------------------------------------------------------
+// v3
+//--------------------------------------------------------------------------------
+
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+pub struct V3 {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
 
 //--------------------------------------------------------------------------------
 // direction
@@ -88,6 +93,16 @@ impl Direction {
         }
     }
 
+    pub fn rot_left(&self) -> Direction {
+        match self {
+            Direction::Up => Direction::Left,
+            Direction::Left => Direction::Down,
+            Direction::Down => Direction::Right,
+            Direction::Right => Direction::Up,
+        }
+    }
+
+    #[allow(clippy::wrong_self_convention)]
     pub fn to_v2(&self) -> &V2 {
         match self {
             Direction::Up => &V2_UP,

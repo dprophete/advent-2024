@@ -1,9 +1,6 @@
-#![feature(array_chunks)]
-#![allow(dead_code)]
-
+use crate::utils::*;
 use regex::Regex;
 use std::fs;
-use utils::tou32;
 
 //--------------------------------------------------------------------------------
 // p1
@@ -56,9 +53,9 @@ fn p2(input: &str) {
 // main
 //--------------------------------------------------------------------------------
 
-fn main() {
-    p1("sample1.txt");
-    p1("input.txt");
-    p2("sample2.txt");
-    p2("input.txt");
+pub fn run() {
+    p1("data/03_sample1.txt");
+    p1("data/03_input.txt");
+    p2("data/03_sample2.txt");
+    p2("data/03_input.txt");
 }

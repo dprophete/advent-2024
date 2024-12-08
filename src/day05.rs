@@ -1,9 +1,5 @@
-#![allow(dead_code)]
-#![feature(array_chunks)]
-
+use crate::utils::*;
 use std::{cmp::Ordering, fs};
-
-use utils::toi32;
 
 type Rule = (i32, i32);
 type Rules = Vec<Rule>;
@@ -86,12 +82,12 @@ fn p2(input: &str) {
 }
 
 //--------------------------------------------------------------------------------
-// main
+// run
 //--------------------------------------------------------------------------------
 
-fn main() {
-    p1("sample.txt");
-    p1("input.txt");
-    p2("sample.txt");
-    p2("input.txt");
+pub fn run() {
+    p1("data/05_sample.txt");
+    p1("data/05_input.txt");
+    p2("data/05_sample.txt");
+    p2("data/05_input.txt");
 }

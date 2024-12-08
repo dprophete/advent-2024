@@ -1,10 +1,7 @@
-#![allow(dead_code)]
-
+use crate::utils::*;
 use std::collections::HashSet;
 use std::fs;
 use std::time::Instant;
-
-use utils::{fmt_t, Direction, Matrix, V2};
 
 //--------------------------------------------------------------------------------
 // p1
@@ -103,12 +100,12 @@ fn p2(input: &str) {
 }
 
 //--------------------------------------------------------------------------------
-// main
+// run
 //--------------------------------------------------------------------------------
 
-fn main() {
-    p1("sample.txt");
-    p1("input.txt");
-    p2("sample.txt");
-    p2("input.txt");
+pub fn run() {
+    p1("data/06_sample.txt");
+    p1("data/06_input.txt");
+    p2("data/06_sample.txt");
+    // p2("data/06_input.txt");
 }

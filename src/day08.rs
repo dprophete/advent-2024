@@ -1,10 +1,8 @@
-#![allow(dead_code)]
-
-use std::collections::{HashMap, HashSet};
-use std::{fs, time::Instant};
+use crate::utils::*;
 
 use itertools::Itertools;
-use utils::{fmt_t, Matrix, V2};
+use std::collections::{HashMap, HashSet};
+use std::{fs, time::Instant};
 
 // find antennas: we build a hahsmap: antenna (char) -> list of positions (vec<V2>)
 fn get_antennas(matrix: &Matrix) -> HashMap<char, Vec<V2>> {
@@ -27,10 +25,17 @@ fn get_antennas(matrix: &Matrix) -> HashMap<char, Vec<V2>> {
 }
 
 fn get_pairs(positions: &Vec<V2>) -> Vec<(V2, V2)> {
+    // for p1 in positions.iter() {
+    //     for p2 in positions.iter() {
+    //         if p1 != p2 {
+    //             (p1, p2);
+    //         }
+    //     }
+    // }
     positions
         .iter()
         .combinations(2)
-        .map(|v| (v[0].clone(), v[1].clone()))
+        .map(|v| (*v[0], *v[1]))
         .collect()
 }
 
@@ -46,7 +51,7 @@ fn p1(input: &str) {
 
     let mut antinodes: HashSet<V2> = HashSet::new();
     for (_antenna, positions) in antennas.iter() {
-        let pairs: Vec<(V2, V2)> = get_pairs(&positions);
+        let pairs: Vec<(V2, V2)> = get_pairs(positions);
 
         for (a1, a2) in pairs {
             let diff = a2.sub(&a1);
@@ -77,7 +82,7 @@ fn p2(input: &str) {
 
     let mut antinodes: HashSet<V2> = HashSet::new();
     for (_antenna, positions) in antennas.iter() {
-        let pairs: Vec<(V2, V2)> = get_pairs(&positions);
+        let pairs: Vec<(V2, V2)> = get_pairs(positions);
 
         for (a1, a2) in pairs {
             let diff = a2.sub(&a1);
@@ -100,12 +105,12 @@ fn p2(input: &str) {
 }
 
 //--------------------------------------------------------------------------------
-// main
+// run
 //--------------------------------------------------------------------------------
 
-fn main() {
-    p1("sample.txt");
-    p1("input.txt");
-    p2("sample.txt");
-    p2("input.txt");
+pub fn run() {
+    p1("data/08_sample.txt");
+    p1("data/08_input.txt");
+    p2("data/08_sample.txt");
+    p2("data/08_input.txt");
 }
