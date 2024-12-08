@@ -23,18 +23,40 @@ pub fn tou32(s: &str) -> u32 {
 // vectors
 //--------------------------------------------------------------------------------
 
-pub type V2 = (i32, i32);
-
-pub fn v2_add((x1, y1): V2, (x2, y2): V2) -> V2 {
-    (x1 + x2, y1 + y2)
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+pub struct V2 {
+    pub x: i32,
+    pub y: i32,
 }
 
-pub fn v2_sub((x1, y1): V2, (x2, y2): V2) -> V2 {
-    (x1 - x2, y1 - y2)
-}
+impl V2 {
+    pub fn new(x: i32, y: i32) -> V2 {
+        V2 { x, y }
+    }
 
-pub fn v2_from_vec(v: &Vec<i32>) -> V2 {
-    (v[0], v[1])
+    pub fn from_vec(v: &Vec<i32>) -> V2 {
+        V2::new(v[0], v[1])
+    }
+
+    pub fn add(&self, other: &V2) -> V2 {
+        V2::new(self.x + other.x, self.y + other.y)
+    }
+
+    pub fn sub(&self, other: &V2) -> V2 {
+        V2::new(self.x - other.x, self.y - other.y)
+    }
+
+    pub fn rot_right(&self) -> V2 {
+        V2::new(self.y, -self.x)
+    }
+
+    pub fn rot_left(&self) -> V2 {
+        V2::new(-self.y, self.x)
+    }
+
+    pub fn move_to_dir(&self, dir: &Direction) -> V2 {
+        self.add(dir.to_v2())
+    }
 }
 
 pub type V3 = (i32, i32, i32);
@@ -51,6 +73,11 @@ pub enum Direction {
     Right,
 }
 
+static V2_UP: V2 = V2 { x: 0, y: -1 };
+static V2_DOWN: V2 = V2 { x: 0, y: 1 };
+static V2_LEFT: V2 = V2 { x: -1, y: 0 };
+static V2_RIGHT: V2 = V2 { x: 1, y: 0 };
+
 impl Direction {
     pub fn rot_right(&self) -> Direction {
         match self {
@@ -61,12 +88,12 @@ impl Direction {
         }
     }
 
-    pub fn to_v2(&self) -> V2 {
+    pub fn to_v2(&self) -> &V2 {
         match self {
-            Direction::Up => (0, -1),
-            Direction::Down => (0, 1),
-            Direction::Left => (-1, 0),
-            Direction::Right => (1, 0),
+            Direction::Up => &V2_UP,
+            Direction::Down => &V2_DOWN,
+            Direction::Left => &V2_LEFT,
+            Direction::Right => &V2_RIGHT,
         }
     }
 }
@@ -93,24 +120,23 @@ impl Matrix {
         Matrix::from_matrix(matrix)
     }
 
-    pub fn is_in(&self, (x, y): V2) -> bool {
-        x >= 0 && y >= 0 && x < self.size && y < self.size
+    pub fn is_in(&self, pos: &V2) -> bool {
+        pos.x >= 0 && pos.y >= 0 && pos.x < self.size && pos.y < self.size
     }
 
     // return char at x, y or '.' if out of bounds
-    pub fn get(&self, (x, y): V2) -> Option<char> {
-        if self.is_in((x, y)) {
-            Some(self.matrix[y as usize][x as usize])
+    pub fn get(&self, pos: &V2) -> Option<char> {
+        if self.is_in(pos) {
+            Some(self.matrix[pos.y as usize][pos.x as usize])
         } else {
             None
         }
     }
 
-    pub fn set(&mut self, (x, y): V2, c: char) -> &mut Self {
-        if x < 0 || y < 0 || x >= self.size || y >= self.size {
-            return self;
+    pub fn set(&mut self, pos: &V2, c: char) -> &mut Self {
+        if self.is_in(pos) {
+            self.matrix[pos.y as usize][pos.x as usize] = c;
         }
-        self.matrix[y as usize][x as usize] = c;
         self
     }
 }
@@ -119,7 +145,7 @@ impl Display for Matrix {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for y in 0..self.size {
             for x in 0..self.size {
-                write!(f, "{}", self.get((x, y)).unwrap_or('*'))?;
+                write!(f, "{}", self.get(&V2::new(x, y)).unwrap_or('*'))?;
             }
             writeln!(f)?;
         }

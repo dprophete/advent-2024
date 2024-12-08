@@ -13,17 +13,12 @@ use utils::{fmt_t, Direction, Matrix, V2};
 fn find_start(matrix: &Matrix) -> V2 {
     for y in 0..matrix.size {
         for x in 0..matrix.size {
-            if matrix.get((x, y)) == Some('^') {
-                return (x, y);
+            if matrix.get(&V2::new(x, y)) == Some('^') {
+                return V2::new(x, y);
             }
         }
     }
-    (-1, -1)
-}
-
-fn move_to_dir((x, y): V2, dir: &Direction) -> V2 {
-    let (vx, vy) = dir.to_v2();
-    (x + vx, y + vy)
+    V2::new(-1, -1)
 }
 
 fn p1(input: &str) {
@@ -35,13 +30,13 @@ fn p1(input: &str) {
     let mut dir = Direction::Up;
     let mut sum = 1;
     loop {
-        let nx = move_to_dir(pos, &dir);
-        match matrix.get(nx) {
+        let nx = pos.move_to_dir(&dir);
+        match matrix.get(&nx) {
             None => break,
             Some('#') => dir = dir.rot_right(),
             Some('.') => {
                 pos = nx;
-                matrix.set(pos, 'X'); // so we can remember where we've been here
+                matrix.set(&pos, 'X'); // so we can remember where we've been here
                 sum += 1;
             }
             _ => pos = nx,
@@ -63,8 +58,8 @@ fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
     let mut times_at_pos = HashMap::new();
     let mut dir = Direction::Up;
     loop {
-        let nx = move_to_dir(pos, &dir);
-        match matrix.get(nx) {
+        let nx = pos.move_to_dir(&dir);
+        match matrix.get(&nx) {
             None => return false,
             Some('#') | Some('O') => dir = dir.rot_right(),
             _ => {
@@ -91,18 +86,18 @@ fn p2(input: &str) {
     let mut pos = start;
 
     loop {
-        let nx = move_to_dir(pos, &dir);
-        match matrix.get(nx) {
+        let nx = pos.move_to_dir(&dir);
+        match matrix.get(&nx) {
             None => break,
             Some('#') => dir = dir.rot_right(),
             Some('.') => {
                 // let's try to put an obstacle here and see if we are in a loop...
                 pos = nx;
-                matrix.set(pos, 'O');
+                matrix.set(&pos, 'O');
                 if is_in_loop(&matrix, start) {
                     sum += 1;
                 }
-                matrix.set(pos, 'X'); // so we can remember where we've been here
+                matrix.set(&pos, 'X'); // so we can remember where we've been here
             }
             _ => pos = nx,
         }
