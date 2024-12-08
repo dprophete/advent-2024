@@ -1,108 +1,99 @@
 #![allow(dead_code)]
 
+use std::collections::{HashMap, HashSet};
 use std::{fs, time::Instant};
 
-fn toi64(s: &str) -> i64 {
-    s.parse::<i64>().unwrap()
+use itertools::Itertools;
+use utils::{fmt_t, v2_add, v2_sub, Matrix, V2};
+
+// find antennas: we build a hahsmap: antenna (char) -> list of positions (vec<V2>)
+fn get_antennas(matrix: &Matrix) -> HashMap<char, Vec<V2>> {
+    let mut antennas: HashMap<char, Vec<V2>> = HashMap::new();
+    for y in 0..matrix.size {
+        for x in 0..matrix.size {
+            match matrix.get((x, y)) {
+                None | Some('.') => {}
+                Some(a) => {
+                    let current = antennas.entry(a).or_insert(vec![]);
+                    current.push((x, y));
+                }
+            }
+        }
+    }
+    antennas
 }
 
-fn format_d(duration: std::time::Duration) -> String {
-    if duration.as_secs() > 0 {
-        format!("{:.2}s", duration.as_secs_f64())
-    } else if duration.as_millis() > 0 {
-        format!("{}ms", duration.as_millis())
-    } else if duration.as_micros() > 0 {
-        format!("{}µs", duration.as_micros())
-    } else {
-        format!("{}ns", duration.as_nanos())
-    }
+fn get_pairs(positions: &Vec<V2>) -> Vec<(V2, V2)> {
+    positions
+        .iter()
+        .combinations(2)
+        .map(|v| (*v[0], *v[1]))
+        .collect()
 }
 
 //--------------------------------------------------------------------------------
 // p1
 //--------------------------------------------------------------------------------
 
-fn parse_file(input: &str) -> Vec<(i64, Vec<i64>)> {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-
-    file_content
-        .lines()
-        .map(|line| {
-            let (lhs, rhs) = line.split_once(": ").unwrap();
-            (toi64(lhs), rhs.split(" ").map(toi64).collect::<Vec<i64>>())
-        })
-        .collect::<Vec<(i64, Vec<i64>)>>()
-}
-
-fn p1_is_equation_valid(total: i64, lst: &[i64]) -> bool {
-    let mut nbs = vec![lst[0]];
-
-    for nx in lst.iter().skip(1) {
-        nbs = nbs
-            .iter()
-            .flat_map(|acc| vec![acc + nx, acc * nx])
-            .collect();
-    }
-    nbs.contains(&total)
-}
-
 fn p1(input: &str) {
     let start_t = Instant::now();
-    let equations = parse_file(input);
+    let file_content = fs::read_to_string(input).expect("cannot read sample file");
+    let matrix = Matrix::from_str(&file_content);
+    let antennas = get_antennas(&matrix);
 
-    let mut sum = 0;
-    for (total, lst) in equations {
-        if p1_is_equation_valid(total, &lst) {
-            sum += total;
+    let mut antinodes: HashSet<V2> = HashSet::new();
+    for (_antenna, positions) in antennas.iter() {
+        let pairs: Vec<(V2, V2)> = get_pairs(&positions);
+
+        for (a1, a2) in pairs {
+            let diff = v2_sub(a2, a1);
+            let an1 = v2_sub(a1, diff);
+            let an2 = v2_add(a2, diff);
+            if matrix.is_in(an1) {
+                antinodes.insert(an1);
+            }
+            if matrix.is_in(an2) {
+                antinodes.insert(an2);
+            }
         }
     }
-    println!("[{}] p1 {} -> {}", format_d(start_t.elapsed()), input, sum);
+
+    let sum = antinodes.len();
+    println!("[{}] p1 {} -> {}", fmt_t(start_t), input, sum);
 }
 
 //--------------------------------------------------------------------------------
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2_is_equation_valid(total: i64, lst: &[i64]) -> bool {
-    // we are keeping the string representation of the equation to be able to print it for
-    // debugging....
-    let mut nbs = vec![(lst[0], format!("{}", lst[0]))];
-
-    for nx in lst.iter().skip(1) {
-        nbs = nbs
-            .iter()
-            .flat_map(|(acc, str)| {
-                vec![
-                    (acc + nx, format!("{} + {}", str, nx)),
-                    (acc * nx, format!("{} * {}", str, nx)),
-                    (
-                        toi64(&format!("{}{}", acc, nx)),
-                        format!("{} || {}", str, nx),
-                    ),
-                ]
-            })
-            .collect();
-    }
-    for (acc, str) in nbs.iter() {
-        if *acc == total {
-            println!("{} = {}", acc, str);
-            return true;
-        }
-    }
-    false
-}
-
 fn p2(input: &str) {
     let start_t = Instant::now();
-    let equations = parse_file(input);
+    let file_content = fs::read_to_string(input).expect("cannot read sample file");
+    let matrix = Matrix::from_str(&file_content);
+    let antennas = get_antennas(&matrix);
 
-    let mut sum = 0;
-    for (total, lst) in equations {
-        if p2_is_equation_valid(total, &lst) {
-            sum += total;
+    let mut antinodes: HashSet<V2> = HashSet::new();
+    for (_antenna, positions) in antennas.iter() {
+        let pairs: Vec<(V2, V2)> = get_pairs(&positions);
+
+        for (a1, a2) in pairs {
+            let diff = v2_sub(a2, a1);
+
+            let mut p = a1.clone();
+            while matrix.is_in(p) {
+                antinodes.insert(p);
+                p = v2_sub(p, diff);
+            }
+            p = a2.clone();
+            while matrix.is_in(p) {
+                antinodes.insert(p);
+                p = v2_add(p, diff);
+            }
         }
     }
-    println!("[{}] p2 {} -> {}", format_d(start_t.elapsed()), input, sum);
+
+    let sum = antinodes.len();
+    println!("[{}] p2 {} -> {}", fmt_t(start_t), input, sum);
 }
 
 //--------------------------------------------------------------------------------
@@ -110,8 +101,8 @@ fn p2(input: &str) {
 //--------------------------------------------------------------------------------
 
 fn main() {
-    // p1("sample.txt");
+    p1("sample.txt");
     p1("input.txt");
     p2("sample.txt");
-    // p2("input.txt");
+    p2("input.txt");
 }

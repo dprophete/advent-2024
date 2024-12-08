@@ -5,4 +5,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-itertools = "0.13.0" # or the latest version
+utils = { path = "../utils" }
+itertools = "0.13.0"          # or the latest version

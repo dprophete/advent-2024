@@ -29,7 +29,7 @@ fn move_to_dir((x, y): V2, dir: &Direction) -> V2 {
 fn p1(input: &str) {
     let start_t = Instant::now();
     let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let mut matrix = Matrix::from_str(file_content.as_str());
+    let mut matrix = Matrix::from_str(&file_content);
 
     let mut pos = find_start(&matrix);
     let mut dir = Direction::Up;
@@ -82,7 +82,7 @@ fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
 fn p2(input: &str) {
     let start_t = Instant::now();
     let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let mut matrix = Matrix::from_str(file_content.as_str());
+    let mut matrix = Matrix::from_str(&file_content);
 
     let start = find_start(&matrix);
     let mut sum = 0;

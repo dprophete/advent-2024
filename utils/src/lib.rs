@@ -25,6 +25,18 @@ pub fn tou32(s: &str) -> u32 {
 
 pub type V2 = (i32, i32);
 
+pub fn v2_add((x1, y1): V2, (x2, y2): V2) -> V2 {
+    (x1 + x2, y1 + y2)
+}
+
+pub fn v2_sub((x1, y1): V2, (x2, y2): V2) -> V2 {
+    (x1 - x2, y1 - y2)
+}
+
+pub fn v2_from_vec(v: &Vec<i32>) -> V2 {
+    (v[0], v[1])
+}
+
 pub type V3 = (i32, i32, i32);
 
 //--------------------------------------------------------------------------------
@@ -81,12 +93,17 @@ impl Matrix {
         Matrix::from_matrix(matrix)
     }
 
+    pub fn is_in(&self, (x, y): V2) -> bool {
+        x >= 0 && y >= 0 && x < self.size && y < self.size
+    }
+
     // return char at x, y or '.' if out of bounds
     pub fn get(&self, (x, y): V2) -> Option<char> {
-        if x < 0 || y < 0 || x >= self.size || y >= self.size {
-            return None;
+        if self.is_in((x, y)) {
+            Some(self.matrix[y as usize][x as usize])
+        } else {
+            None
         }
-        Some(self.matrix[y as usize][x as usize])
     }
 
     pub fn set(&mut self, (x, y): V2, c: char) -> &mut Self {
