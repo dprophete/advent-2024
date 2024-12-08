@@ -11,11 +11,14 @@ fn get_antennas(matrix: &Matrix) -> HashMap<char, Vec<V2>> {
     let mut antennas: HashMap<char, Vec<V2>> = HashMap::new();
     for y in 0..matrix.size {
         for x in 0..matrix.size {
-            match matrix.get((x, y)) {
+            let pos = (x, y);
+            match matrix.get(pos) {
                 None | Some('.') => {}
                 Some(a) => {
-                    let current = antennas.entry(a).or_insert(vec![]);
-                    current.push((x, y));
+                    antennas
+                        .entry(a)
+                        .and_modify(|v| v.push(pos))
+                        .or_insert(vec![pos]);
                 }
             }
         }
