@@ -207,5 +207,5 @@ pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
 // run p1/p2 function with the content of the file
 pub fn run_it<R>(p: fn(&str) -> R, file: &str) -> R {
     let input = fs::read_to_string(file).expect("cannot read sample file");
-    p(&input)
+    p(&input.trim_end())
 }
