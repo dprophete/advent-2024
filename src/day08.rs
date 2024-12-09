@@ -23,7 +23,7 @@ fn get_antennas(matrix: &Matrix) -> HashMap<char, Vec<V2>> {
     antennas
 }
 
-fn get_pairs(positions: &Vec<V2>) -> Vec<(V2, V2)> {
+fn get_pairs(positions: &[V2]) -> Vec<(V2, V2)> {
     // for p1 in positions.iter() {
     //     for p2 in positions.iter() {
     //         if p1 != p2 {
