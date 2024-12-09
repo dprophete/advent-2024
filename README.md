@@ -9,4 +9,4 @@ For reference, [last year](https://github.com/dprophete/advent-2023) I started u
 
 ## running
 
-Edit src/main.rs and change the day to the one you want to run. Then `cargo run` is your friend.
+Edit [src/main.rs](./src/main.rs) and change the day to the one you want to run. Then `cargo run` is your friend.
