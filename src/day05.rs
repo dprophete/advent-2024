@@ -10,8 +10,8 @@ type Updates = Vec<Update>;
 // p1
 //--------------------------------------------------------------------------------
 
-fn parse_input(file_content: &str) -> (Rules, Updates) {
-    let (first, second) = file_content.split_once("\n\n").unwrap();
+fn parse_input(input: &str) -> (Rules, Updates) {
+    let (first, second) = input.split_once("\n\n").unwrap();
 
     let rules: Rules = first
         .lines()

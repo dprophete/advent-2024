@@ -1,7 +1,5 @@
 use crate::utils::*;
 use std::collections::HashSet;
-use std::fs;
-use std::time::Instant;
 
 //--------------------------------------------------------------------------------
 // p1
@@ -18,10 +16,8 @@ fn find_start(matrix: &Matrix) -> V2 {
     V2::new(-1, -1)
 }
 
-fn p1(input: &str) {
-    let start_t = Instant::now();
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let mut matrix = Matrix::from_str(&file_content);
+fn p1(input: &str) -> i32 {
+    let mut matrix = Matrix::from_str(input);
 
     let mut pos = find_start(&matrix);
     let mut dir = Direction::Up;
@@ -39,8 +35,7 @@ fn p1(input: &str) {
             _ => pos = nx,
         }
     }
-
-    println!("[{}] p1 {} -> {}", fmt_t(start_t), input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
@@ -67,10 +62,8 @@ fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
     }
 }
 
-fn p2(input: &str) {
-    let start_t = Instant::now();
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let mut matrix = Matrix::from_str(&file_content);
+fn p2(input: &str) -> i32 {
+    let mut matrix = Matrix::from_str(input);
 
     let start = find_start(&matrix);
     let mut sum = 0;
@@ -95,17 +88,31 @@ fn p2(input: &str) {
             _ => pos = nx,
         }
     }
-
-    println!("[{}] p2 {} -> {}", fmt_t(start_t), input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
-// run
+// main
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    p1("data/06_sample.txt");
-    p1("data/06_input.txt");
-    p2("data/06_sample.txt");
-    // p2("data/06_input.txt");
+    time_it(p1, "data/06_sample.txt");
+    time_it(p1, "data/06_input.txt");
+    time_it(p2, "data/06_sample.txt");
+    // time_it(p2, "data/06_input.txt");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_p1() {
+        assert_eq!(run_it(p1, "data/06_sample.txt"), 41);
+    }
+
+    #[test]
+    fn test_p2() {
+        assert_eq!(run_it(p2, "data/06_sample.txt"), 6);
+    }
 }
