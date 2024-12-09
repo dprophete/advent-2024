@@ -177,11 +177,7 @@ impl Display for Matrix {
 // formatting
 //--------------------------------------------------------------------------------
 
-pub fn fmt_t(instant: Instant) -> String {
-    fmt_d(instant.elapsed())
-}
-
-pub fn fmt_d(duration: Duration) -> String {
+pub fn fmt_duration(duration: Duration) -> String {
     if duration.as_secs() > 0 {
         format!("{:.2}s", duration.as_secs_f64())
     } else if duration.as_millis() > 0 {
@@ -204,8 +200,10 @@ pub fn bool_to_u32(b: bool) -> u32 {
 
 // time p1/p2 function with the content of the file
 pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
-    let start_t = Instant::now();
-    println!("[{}] {} -> {}", fmt_t(start_t), file, run_it(p, file));
+    let start = Instant::now();
+    let res = run_it(p, file);
+    let duration = start.elapsed();
+    println!("[{}] {} -> {}", fmt_duration(duration), file, res);
 }
 
 // run p1/p2 function with the content of the file
