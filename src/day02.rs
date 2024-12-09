@@ -8,7 +8,7 @@ fn parse_line(line: &str) -> Vec<i32> {
     line.split_ascii_whitespace().map(toi32).collect::<Vec<_>>()
 }
 
-fn is_safe_p1(line: &Vec<i32>) -> bool {
+fn is_safe_p1(line: &[i32]) -> bool {
     let &[v1, v2] = line.array_chunks::<2>().next().unwrap();
     let is_going_up = (v2 - v1) > 0;
 
@@ -27,28 +27,36 @@ fn is_safe_p1(line: &Vec<i32>) -> bool {
 }
 
 fn p1(input: &str) -> usize {
-    input.lines().map(parse_line).filter(is_safe_p1).count()
+    input
+        .lines()
+        .map(parse_line)
+        .filter(|l| is_safe_p1(l))
+        .count()
 }
 
 //--------------------------------------------------------------------------------
 // p2
 //--------------------------------------------------------------------------------
 
-fn line_without_idx(line: &Vec<i32>, i: usize) -> Vec<i32> {
+fn line_without_idx(line: &[i32], i: usize) -> Vec<i32> {
     line.iter()
         .enumerate()
         .filter_map(|(idx, &v)| if idx != i { Some(v) } else { None })
         .collect()
 }
 
-fn is_safe_p2(line: &Vec<i32>) -> bool {
+fn is_safe_p2(line: &[i32]) -> bool {
     (0..line.len())
         .map(|i| line_without_idx(line, i))
         .any(|modified_line| is_safe_p1(&modified_line))
 }
 
 fn p2(input: &str) -> usize {
-    input.lines().map(parse_line).filter(is_safe_p2).count()
+    input
+        .lines()
+        .map(parse_line)
+        .filter(|l| is_safe_p2(l))
+        .count()
 }
 
 //--------------------------------------------------------------------------------
