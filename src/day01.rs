@@ -52,12 +52,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_p1() {
+    fn test() {
         assert_eq!(run_it(p1, "data/01_sample.txt"), 11);
-    }
-
-    #[test]
-    fn test_p2() {
         assert_eq!(run_it(p2, "data/01_sample.txt"), 31);
     }
 }
