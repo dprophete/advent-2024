@@ -4,26 +4,25 @@ use crate::utils::*;
 // p1
 //--------------------------------------------------------------------------------
 
-fn pp_blocks(dm: &[i32]) {
-    for &nb in dm {
-        if nb == -1 {
-            print!(".");
-        } else {
-            print!("{}", nb);
+fn pp_blocks(dm: &[Option<u32>]) {
+    for &o_file in dm {
+        match o_file {
+            Some(file) => print!("{}", file),
+            None => print!("."),
         }
     }
     println!();
 }
 
-fn diskmap_to_blocks(dm: &[u32]) -> Vec<i32> {
+fn diskmap_to_blocks(dm: &[u32]) -> Vec<Option<u32>> {
     let mut is_free_space = false;
     let mut block_nb = 0;
-    let mut blocks: Vec<i32> = Vec::new();
+    let mut blocks: Vec<Option<u32>> = Vec::new();
 
     for &nb in dm {
-        let x = if is_free_space { -1 } else { block_nb };
+        let o_file = if is_free_space { None } else { Some(block_nb) };
         for _ in 0..nb {
-            blocks.push(x);
+            blocks.push(o_file);
         }
         if !is_free_space {
             block_nb += 1;
@@ -33,18 +32,18 @@ fn diskmap_to_blocks(dm: &[u32]) -> Vec<i32> {
     blocks
 }
 
-fn compact_blocks_p1(blocks: &[i32]) -> Vec<i32> {
-    let mut compacted: Vec<i32> = vec![];
+fn compact_blocks_p1(blocks: &[Option<u32>]) -> Vec<Option<u32>> {
+    let mut compacted: Vec<Option<u32>> = vec![];
 
     let mut idx_empty = 0;
     let mut idx_file = blocks.len() - 1;
 
     while idx_file >= idx_empty {
-        while blocks[idx_empty] != -1 && idx_file >= idx_empty {
+        while blocks[idx_empty] != None && idx_file >= idx_empty {
             compacted.push(blocks[idx_empty]);
             idx_empty += 1;
         }
-        while blocks[idx_file] == -1 && idx_file >= idx_empty {
+        while blocks[idx_file] == None && idx_file >= idx_empty {
             idx_file -= 1;
         }
         if idx_empty >= idx_file {
@@ -57,10 +56,10 @@ fn compact_blocks_p1(blocks: &[i32]) -> Vec<i32> {
     compacted.to_vec()
 }
 
-fn checksum(blocks: &[i32]) -> usize {
+fn checksum(blocks: &[Option<u32>]) -> usize {
     let mut sum = 0;
-    for (idx, &file) in blocks.iter().enumerate() {
-        if file != -1 {
+    for (idx, &o_file) in blocks.iter().enumerate() {
+        if let Some(file) = o_file {
             sum += idx * (file as usize);
         }
     }
@@ -80,14 +79,13 @@ fn p1(input: &str) -> usize {
 // p2
 //--------------------------------------------------------------------------------
 
-fn find_empty_of_size(blocks: &[i32], size: usize) -> Option<usize> {
+fn find_empty_of_size(blocks: &[Option<u32>], size: usize) -> Option<usize> {
     let mut count = 0;
     for i in 0..blocks.len() {
-        if blocks[i] == -1 {
-            count += 1;
-        } else {
-            count = 0;
-        }
+        count = match blocks[i] {
+            Some(_) => 0,
+            None => count + 1,
+        };
         if count == size {
             return Some(i - size + 1);
         }
@@ -95,28 +93,28 @@ fn find_empty_of_size(blocks: &[i32], size: usize) -> Option<usize> {
     None
 }
 
-fn compact_blocks_p2(blocks: &[i32]) -> Vec<i32> {
-    let mut compacted: Vec<i32> = blocks.to_vec();
+fn compact_blocks_p2(blocks: &[Option<u32>]) -> Vec<Option<u32>> {
+    let mut compacted: Vec<Option<u32>> = blocks.to_vec();
 
     let mut idx_file = blocks.len() - 1;
-    let mut file = blocks[blocks.len() - 1];
+    let mut file = blocks[blocks.len() - 1].unwrap();
 
     while file > 0 {
         // find file
-        while compacted[idx_file] != file {
+        while compacted[idx_file] != Some(file) {
             idx_file -= 1;
         }
         // size of file
         let mut size_of_file = 0;
-        while compacted[idx_file] == file {
+        while compacted[idx_file] == Some(file) {
             size_of_file += 1;
             idx_file -= 1;
         }
         match find_empty_of_size(&compacted, size_of_file) {
             Some(idx_empty) if idx_empty <= idx_file => {
                 for i in 0..size_of_file {
-                    compacted[idx_file + size_of_file - i] = -1;
-                    compacted[idx_empty + i] = file;
+                    compacted[idx_file + size_of_file - i] = None;
+                    compacted[idx_empty + i] = Some(file);
                 }
             }
             _ => {}
