@@ -1,5 +1,4 @@
 use crate::utils::*;
-use std::fs;
 
 //--------------------------------------------------------------------------------
 // p1
@@ -27,16 +26,8 @@ fn is_safe_p1(line: &Vec<i32>) -> bool {
     true
 }
 
-fn p1(input: &str) {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-
-    let nb_safe = file_content
-        .lines()
-        .map(parse_line)
-        .filter(is_safe_p1)
-        .count();
-
-    println!("p1 sum for {} -> {}", input, nb_safe);
+fn p1(input: &str) -> usize {
+    input.lines().map(parse_line).filter(is_safe_p1).count()
 }
 
 //--------------------------------------------------------------------------------
@@ -56,25 +47,32 @@ fn is_safe_p2(line: &Vec<i32>) -> bool {
         .any(|modified_line| is_safe_p1(&modified_line))
 }
 
-fn p2(input: &str) {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-
-    let nb_safe = file_content
-        .lines()
-        .map(parse_line)
-        .filter(is_safe_p2)
-        .count();
-
-    println!("p2 sum for {} -> {}", input, nb_safe);
+fn p2(input: &str) -> usize {
+    input.lines().map(parse_line).filter(is_safe_p2).count()
 }
 
 //--------------------------------------------------------------------------------
-// run
+// main
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    p1("data/02_sample.txt");
-    p1("data/02_input.txt");
-    p2("data/02_sample.txt");
-    p2("data/02_input.txt");
+    time_it(p1, "data/02_sample.txt");
+    time_it(p1, "data/02_input.txt");
+    time_it(p2, "data/02_sample.txt");
+    time_it(p2, "data/02_input.txt");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_p1() {
+        assert_eq!(run_it(p1, "data/02_sample.txt"), 2);
+    }
+
+    #[test]
+    fn test_p2() {
+        assert_eq!(run_it(p2, "data/02_sample.txt"), 4);
+    }
 }

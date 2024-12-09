@@ -1,5 +1,6 @@
 use std::{
     fmt::{self, Display},
+    fs,
     time::{Duration, Instant},
 };
 
@@ -195,4 +196,14 @@ pub fn fmt_d(duration: Duration) -> String {
 // false -> 0, true -> 1
 pub fn bool_to_u16(b: bool) -> u16 {
     b as u16
+}
+
+pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
+    let start_t = Instant::now();
+    println!("[{}] {} -> {}", fmt_t(start_t), file, run_it(p, file));
+}
+
+pub fn run_it<R>(p: fn(&str) -> R, file: &str) -> R {
+    let input = fs::read_to_string(file).expect(&format!("cannot read sample file {}", file));
+    p(&input)
 }

@@ -1,5 +1,4 @@
 use crate::utils::*;
-use std::fs;
 
 //--------------------------------------------------------------------------------
 // p1
@@ -11,27 +10,22 @@ fn parse_line(line: &str) -> (i32, i32) {
     (l, r)
 }
 
-fn p1(input: &str) {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-
-    let (mut left, mut right): (Vec<i32>, Vec<i32>) = file_content.lines().map(parse_line).unzip();
+fn p1(input: &str) -> i32 {
+    let (mut left, mut right): (Vec<i32>, Vec<i32>) = input.lines().map(parse_line).unzip();
     left.sort();
     right.sort();
 
     let pairs: Vec<(i32, i32)> = left.into_iter().zip(right).collect();
     let sum = pairs.iter().map(|(l, r)| (r - l).abs()).sum::<i32>();
-
-    println!("p1 sum for {} -> {}", input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2(input: &str) {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-
-    let (left, right): (Vec<i32>, Vec<i32>) = file_content.lines().map(parse_line).unzip();
+fn p2(input: &str) -> i32 {
+    let (left, right): (Vec<i32>, Vec<i32>) = input.lines().map(parse_line).unzip();
     let mut sum = 0;
     for l in left.iter() {
         // not super optimized, but it works
@@ -39,16 +33,31 @@ fn p2(input: &str) {
         sum += nb_matches * l;
     }
 
-    println!("p2 sum for {} -> {}", input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
-// run
+// main
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    p1("data/01_sample.txt");
-    p1("data/01_input.txt");
-    p2("data/01_sample.txt");
-    p2("data/01_input.txt");
+    time_it(p1, "data/01_sample.txt");
+    time_it(p1, "data/01_sample.txt");
+    time_it(p2, "data/01_sample.txt");
+    time_it(p2, "data/01_input.txt");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_p1() {
+        assert_eq!(run_it(p1, "data/01_sample.txt"), 11);
+    }
+
+    #[test]
+    fn test_p2() {
+        assert_eq!(run_it(p2, "data/01_sample.txt"), 31);
+    }
 }
