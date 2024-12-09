@@ -1,5 +1,4 @@
 use crate::utils::*;
-use std::fs;
 
 //--------------------------------------------------------------------------------
 // p1
@@ -8,15 +7,15 @@ use std::fs;
 // part1 matrix extension
 impl Matrix {
     // check if MAS is at (x, y) in the dir (dx, dy)
-    fn is_mas_in_dir(&self, pos: V2, dir: V2) -> u16 {
-        bool_to_u16(
+    fn is_mas_in_dir(&self, pos: V2, dir: V2) -> u32 {
+        bool_to_u32(
             self.get(&pos.add(&dir)) == Some('M')
                 && self.get(&pos.add(&dir.times(2))) == Some('A')
                 && self.get(&pos.add(&dir.times(3))) == Some('S'),
         )
     }
 
-    fn nb_xmas_at_point(&self, pos: V2) -> u16 {
+    fn nb_xmas_at_point(&self, pos: V2) -> u32 {
         // short circuit
         if self.get(&pos) != Some('X') {
             return 0;
@@ -33,9 +32,8 @@ impl Matrix {
     }
 }
 
-fn p1(input: &str) {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let matrix = Matrix::from_str(&file_content);
+fn p1(input: &str) -> u32 {
+    let matrix = Matrix::from_str(input);
     let size: i32 = matrix.size;
 
     let mut sum = 0;
@@ -44,8 +42,7 @@ fn p1(input: &str) {
             sum += matrix.nb_xmas_at_point(V2::new(x, y))
         }
     }
-
-    println!("p1 sum for {} -> {}", input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
@@ -69,19 +66,17 @@ impl Matrix {
     }
 }
 
-fn p2(input: &str) {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let matrix = Matrix::from_str(&file_content);
+fn p2(input: &str) -> u32 {
+    let matrix = Matrix::from_str(input);
     let size: i32 = matrix.size;
 
     let mut sum = 0;
     for y in 0..size {
         for x in 0..size {
-            sum += bool_to_u16(matrix.is_x_dash_mas_at_point(V2::new(x, y)))
+            sum += bool_to_u32(matrix.is_x_dash_mas_at_point(V2::new(x, y)))
         }
     }
-
-    println!("p1 sum for {} -> {}", input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
@@ -89,8 +84,23 @@ fn p2(input: &str) {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    p1("data/04_sample.txt");
-    p1("data/04_input.txt");
-    p2("data/04_sample.txt");
-    p2("data/04_input.txt");
+    time_it(p1, "data/04_sample.txt");
+    time_it(p1, "data/04_input.txt");
+    time_it(p2, "data/04_sample.txt");
+    time_it(p2, "data/04_input.txt");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_p1() {
+        assert_eq!(run_it(p1, "data/04_sample.txt"), 18);
+    }
+
+    #[test]
+    fn test_p2() {
+        assert_eq!(run_it(p2, "data/04_sample.txt"), 9);
+    }
 }

@@ -126,14 +126,14 @@ pub struct Matrix {
 
 // base matrix
 impl Matrix {
-    pub fn from_matrix(matrix: Vec<Vec<char>>) -> Matrix {
+    pub fn from_vec(matrix: Vec<Vec<char>>) -> Matrix {
         let size = matrix.len() as i32;
         Matrix { matrix, size }
     }
 
     pub fn from_str(content: &str) -> Matrix {
         let matrix: Vec<Vec<char>> = content.lines().map(|line| line.chars().collect()).collect();
-        Matrix::from_matrix(matrix)
+        Matrix::from_vec(matrix)
     }
 
     pub fn is_in(&self, pos: &V2) -> bool {
@@ -194,8 +194,8 @@ pub fn fmt_d(duration: Duration) -> String {
 //--------------------------------------------------------------------------------
 
 // false -> 0, true -> 1
-pub fn bool_to_u16(b: bool) -> u16 {
-    b as u16
+pub fn bool_to_u32(b: bool) -> u32 {
+    b as u32
 }
 
 pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
@@ -204,6 +204,6 @@ pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
 }
 
 pub fn run_it<R>(p: fn(&str) -> R, file: &str) -> R {
-    let input = fs::read_to_string(file).expect(&format!("cannot read sample file {}", file));
+    let input = fs::read_to_string(file).expect("cannot read sample file");
     p(&input)
 }

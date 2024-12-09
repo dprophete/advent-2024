@@ -9,7 +9,7 @@ fn p1(input: &str) -> u32 {
     let re = Regex::new(r"mul\(([1-9]\d{0,2}),([1-9]\d{0,2})\)").unwrap();
 
     let sum = re
-        .captures_iter(&input)
+        .captures_iter(input)
         .map(|caps| {
             let n1 = tou32(&caps[1]);
             let n2 = tou32(&caps[2]);
@@ -28,7 +28,7 @@ fn p2(input: &str) -> u32 {
 
     let mut enabled = true;
     let mut sum = 0;
-    re.captures_iter(&input).for_each(|caps| {
+    re.captures_iter(input).for_each(|caps| {
         if caps[0].to_string() == "do()" {
             enabled = true
         } else if caps[0].to_string() == "don't()" {
