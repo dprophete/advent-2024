@@ -9,4 +9,4 @@ For reference, [last year](https://github.com/dprophete/advent-2023) I started u
 
 ## running
 
-You should be able to cd into any dir, and simply `cargo run`
+Edit src/main.rs and change the day to the one you want to run. Then `cargo run` is your friend.
