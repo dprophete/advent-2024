@@ -1,14 +1,11 @@
 use crate::utils::*;
-use std::{fs, time::Instant};
 
 //--------------------------------------------------------------------------------
 // p1
 //--------------------------------------------------------------------------------
 
-fn parse_file(input: &str) -> Vec<(i64, Vec<i64>)> {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-
-    file_content
+fn parse_input(input: &str) -> Vec<(i64, Vec<i64>)> {
+    input
         .lines()
         .map(|line| {
             let (lhs, rhs) = line.split_once(": ").unwrap();
@@ -29,9 +26,8 @@ fn p1_is_equation_valid(total: i64, lst: &[i64]) -> bool {
     nbs.contains(&total)
 }
 
-fn p1(input: &str) {
-    let start_t = Instant::now();
-    let equations = parse_file(input);
+fn p1(input: &str) -> i64 {
+    let equations = parse_input(input);
 
     let mut sum = 0;
     for (total, lst) in equations {
@@ -39,7 +35,7 @@ fn p1(input: &str) {
             sum += total;
         }
     }
-    println!("[{}] p1 {} -> {}", fmt_d(start_t.elapsed()), input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
@@ -75,9 +71,8 @@ fn p2_is_equation_valid(total: i64, lst: &[i64]) -> bool {
     false
 }
 
-fn p2(input: &str) {
-    let start_t = Instant::now();
-    let equations = parse_file(input);
+fn p2(input: &str) -> i64 {
+    let equations = parse_input(input);
 
     let mut sum = 0;
     for (total, lst) in equations {
@@ -85,7 +80,7 @@ fn p2(input: &str) {
             sum += total;
         }
     }
-    println!("[{}] p2 {} -> {}", fmt_d(start_t.elapsed()), input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
@@ -93,8 +88,23 @@ fn p2(input: &str) {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    p1("data/07_sample.txt");
-    p1("data/07_input.txt");
-    p2("data/07_sample.txt");
-    // p2("data/07_input.txt");
+    time_it(p1, "data/07_sample.txt");
+    time_it(p1, "data/07_input.txt");
+    time_it(p2, "data/07_sample.txt");
+    // time_it(p2, "data/07_input.txt");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_p1() {
+        assert_eq!(run_it(p1, "data/07_sample.txt"), 3749);
+    }
+
+    #[test]
+    fn test_p2() {
+        assert_eq!(run_it(p2, "data/07_sample.txt"), 11387);
+    }
 }
