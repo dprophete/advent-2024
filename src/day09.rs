@@ -5,8 +5,8 @@ use crate::utils::*;
 //--------------------------------------------------------------------------------
 
 fn pp_blocks(dm: &[Option<u32>]) {
-    for &o_file in dm {
-        match o_file {
+    for &block in dm {
+        match block {
             Some(file) => print!("{}", file),
             None => print!("."),
         }
@@ -20,9 +20,9 @@ fn diskmap_to_blocks(dm: &[u32]) -> Vec<Option<u32>> {
     let mut blocks: Vec<Option<u32>> = Vec::new();
 
     for &nb in dm {
-        let o_file = if is_free_space { None } else { Some(block_nb) };
+        let block = if is_free_space { None } else { Some(block_nb) };
         for _ in 0..nb {
-            blocks.push(o_file);
+            blocks.push(block);
         }
         if !is_free_space {
             block_nb += 1;
