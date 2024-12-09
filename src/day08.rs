@@ -2,7 +2,6 @@ use crate::utils::*;
 
 use itertools::Itertools;
 use std::collections::{HashMap, HashSet};
-use std::{fs, time::Instant};
 
 // find antennas: we build a hahsmap: antenna (char) -> list of positions (vec<V2>)
 fn get_antennas(matrix: &Matrix) -> HashMap<char, Vec<V2>> {
@@ -43,10 +42,8 @@ fn get_pairs(positions: &Vec<V2>) -> Vec<(V2, V2)> {
 // p1
 //--------------------------------------------------------------------------------
 
-fn p1(input: &str) {
-    let start_t = Instant::now();
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let matrix = Matrix::from_str(&file_content);
+fn p1(input: &str) -> usize {
+    let matrix = Matrix::from_str(input);
     let antennas = get_antennas(&matrix);
 
     let mut antinodes: HashSet<V2> = HashSet::new();
@@ -66,18 +63,15 @@ fn p1(input: &str) {
         }
     }
 
-    let sum = antinodes.len();
-    println!("[{}] p1 {} -> {}", fmt_t(start_t), input, sum);
+    antinodes.len()
 }
 
 //--------------------------------------------------------------------------------
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2(input: &str) {
-    let start_t = Instant::now();
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let matrix = Matrix::from_str(&file_content);
+fn p2(input: &str) -> usize {
+    let matrix = Matrix::from_str(input);
     let antennas = get_antennas(&matrix);
 
     let mut antinodes: HashSet<V2> = HashSet::new();
@@ -100,17 +94,31 @@ fn p2(input: &str) {
         }
     }
 
-    let sum = antinodes.len();
-    println!("[{}] p2 {} -> {}", fmt_t(start_t), input, sum);
+    antinodes.len()
 }
 
 //--------------------------------------------------------------------------------
-// run
+// main
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    p1("data/08_sample.txt");
-    p1("data/08_input.txt");
-    p2("data/08_sample.txt");
-    p2("data/08_input.txt");
+    time_it(p1, "data/08_sample.txt");
+    time_it(p1, "data/08_input.txt");
+    time_it(p2, "data/08_sample.txt");
+    time_it(p2, "data/08_input.txt");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_p1() {
+        assert_eq!(run_it(p1, "data/08_sample.txt"), 14);
+    }
+
+    #[test]
+    fn test_p2() {
+        assert_eq!(run_it(p2, "data/08_sample.txt"), 34);
+    }
 }
