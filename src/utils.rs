@@ -20,6 +20,10 @@ pub fn tou32(s: &str) -> u32 {
     s.parse::<u32>().unwrap()
 }
 
+pub fn c_tou32(c: char) -> u32 {
+    c.to_digit(10).unwrap()
+}
+
 //--------------------------------------------------------------------------------
 // v2
 //--------------------------------------------------------------------------------
@@ -207,5 +211,5 @@ pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
 // run p1/p2 function with the content of the file
 pub fn run_it<R>(p: fn(&str) -> R, file: &str) -> R {
     let input = fs::read_to_string(file).expect("cannot read sample file");
-    p(&input.trim_end())
+    p(input.trim_end())
 }
