@@ -1,5 +1,5 @@
 use crate::utils::*;
-use std::{cmp::Ordering, fs};
+use std::cmp::Ordering;
 
 type Rule = (i32, i32);
 type Rules = Vec<Rule>;
@@ -10,7 +10,7 @@ type Updates = Vec<Update>;
 // p1
 //--------------------------------------------------------------------------------
 
-fn parse_file(file_content: &str) -> (Rules, Updates) {
+fn parse_input(file_content: &str) -> (Rules, Updates) {
     let (first, second) = file_content.split_once("\n\n").unwrap();
 
     let rules: Rules = first
@@ -38,9 +38,8 @@ fn is_update_valid(rules: &Rules, update: &Update) -> bool {
     })
 }
 
-fn p1(input: &str) {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let (rules, updates) = parse_file(&file_content);
+fn p1(input: &str) -> i32 {
+    let (rules, updates) = parse_input(input);
 
     let mut sum = 0;
     for update in updates {
@@ -48,8 +47,7 @@ fn p1(input: &str) {
             sum += update[update.len() / 2];
         }
     }
-
-    println!("p1 sum for {} -> {}", input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
@@ -66,9 +64,8 @@ fn order_pages(rules: &Rules, update: &mut Update) {
     })
 }
 
-fn p2(input: &str) {
-    let file_content = fs::read_to_string(input).expect("cannot read sample file");
-    let (rules, updates) = parse_file(&file_content);
+fn p2(input: &str) -> i32 {
+    let (rules, updates) = parse_input(input);
 
     let mut sum = 0;
     for mut update in updates {
@@ -77,8 +74,7 @@ fn p2(input: &str) {
             sum += update[update.len() / 2];
         }
     }
-
-    println!("p2 sum for {} -> {}", input, sum);
+    sum
 }
 
 //--------------------------------------------------------------------------------
@@ -86,8 +82,23 @@ fn p2(input: &str) {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    p1("data/05_sample.txt");
-    p1("data/05_input.txt");
-    p2("data/05_sample.txt");
-    p2("data/05_input.txt");
+    time_it(p1, "data/05_sample.txt");
+    time_it(p1, "data/05_input.txt");
+    time_it(p2, "data/05_sample.txt");
+    time_it(p2, "data/05_input.txt");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_p1() {
+        assert_eq!(run_it(p1, "data/05_sample.txt"), 143);
+    }
+
+    #[test]
+    fn test_p2() {
+        assert_eq!(run_it(p2, "data/05_sample.txt"), 123);
+    }
 }
