@@ -198,11 +198,13 @@ pub fn bool_to_u32(b: bool) -> u32 {
     b as u32
 }
 
+// time p1/p2 function with the content of the file
 pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
     let start_t = Instant::now();
     println!("[{}] {} -> {}", fmt_t(start_t), file, run_it(p, file));
 }
 
+// run p1/p2 function with the content of the file
 pub fn run_it<R>(p: fn(&str) -> R, file: &str) -> R {
     let input = fs::read_to_string(file).expect("cannot read sample file");
     p(&input)
