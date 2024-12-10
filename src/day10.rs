@@ -34,16 +34,16 @@ impl Matrix<i32> {
         res
     }
 
-    fn nb_trails_for_start(&self, start: V2, with_rating: bool) -> usize {
+    fn nb_trails_for_start(&self, start: V2, with_ratings: bool) -> usize {
         let mut matrix = self.clone();
         let mut nb_trails = 0;
         let mut to_explore = vec![start];
-        while !to_explore.clone().is_empty() {
-            let pos = to_explore.pop().unwrap();
+        while let Some(pos) = to_explore.pop() {
             let nxs = matrix.get_nxs(&pos);
             for nx in nxs {
-                if matrix.get(&nx).unwrap() == 9 {
-                    if !with_rating {
+                if matrix.get(&nx) == Some(9) {
+                    if !with_ratings {
+                        // make sure we don't reach that endpoint again
                         matrix.set(&nx, -1);
                     }
                     nb_trails += 1;
