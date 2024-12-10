@@ -1,3 +1,4 @@
+/// mul do and don't
 use crate::utils::*;
 use regex::Regex;
 
@@ -47,6 +48,7 @@ fn p2(input: &str) -> u32 {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
+    println!("### day03: mul do and don't");
     time_it(p1, "data/03_sample1.txt");
     time_it(p1, "data/03_input.txt");
     time_it(p2, "data/03_sample2.txt");

@@ -1,3 +1,4 @@
+/// RPN calculator
 use crate::utils::*;
 
 //--------------------------------------------------------------------------------
@@ -88,6 +89,7 @@ fn p2(input: &str) -> i64 {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
+    println!("### day07: RPN calculator");
     time_it(p1, "data/07_sample.txt");
     time_it(p1, "data/07_input.txt");
     time_it(p2, "data/07_sample.txt");
