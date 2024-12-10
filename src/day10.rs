@@ -5,6 +5,7 @@ use crate::utils::*;
 //--------------------------------------------------------------------------------
 
 impl Matrix<i32> {
+    // find all the starting points
     fn get_starts(&self) -> Vec<V2> {
         let mut starts = vec![];
         for y in 0..self.size {
@@ -17,6 +18,7 @@ impl Matrix<i32> {
         starts
     }
 
+    // for a given pos, find the next candidate positions
     fn get_nxs(&self, pos: &V2) -> Vec<V2> {
         let mut res = vec![];
         let val = self.get(pos).unwrap();
@@ -32,16 +34,18 @@ impl Matrix<i32> {
         res
     }
 
-    fn nb_trails_for_start_p1(&self, start: V2) -> usize {
+    fn nb_trails_for_start(&self, start: V2, with_rating: bool) -> usize {
+        let mut matrix = self.clone();
         let mut nb_trails = 0;
         let mut to_explore = vec![start];
-        let mut matrix = self.clone();
         while !to_explore.clone().is_empty() {
             let pos = to_explore.pop().unwrap();
             let nxs = matrix.get_nxs(&pos);
             for nx in nxs {
                 if matrix.get(&nx).unwrap() == 9 {
-                    matrix.set(&nx, -1);
+                    if !with_rating {
+                        matrix.set(&nx, -1);
+                    }
                     nb_trails += 1;
                 } else {
                     to_explore.push(nx);
@@ -64,7 +68,7 @@ fn p1(input: &str) -> usize {
 
     let mut nb_trails = 0;
     for start in &matrix.get_starts() {
-        nb_trails += matrix.nb_trails_for_start_p1(*start);
+        nb_trails += matrix.nb_trails_for_start(*start, false);
     }
     nb_trails
 }
@@ -73,31 +77,12 @@ fn p1(input: &str) -> usize {
 // p2
 //--------------------------------------------------------------------------------
 
-impl Matrix<i32> {
-    fn nb_trails_for_start_p2(&self, start: V2) -> usize {
-        let mut nb_trails = 0;
-        let mut to_explore = vec![start];
-        while !to_explore.clone().is_empty() {
-            let pos = to_explore.pop().unwrap();
-            let nxs = self.get_nxs(&pos);
-            for nx in nxs {
-                if self.get(&nx).unwrap() == 9 {
-                    nb_trails += 1;
-                } else {
-                    to_explore.push(nx);
-                }
-            }
-        }
-        nb_trails
-    }
-}
-
 fn p2(input: &str) -> usize {
     let matrix = Matrix::from_str(input, convert);
 
     let mut nb_trails = 0;
     for start in &matrix.get_starts() {
-        nb_trails += matrix.nb_trails_for_start_p2(*start);
+        nb_trails += matrix.nb_trails_for_start(*start, true);
     }
     nb_trails
 }
