@@ -35,6 +35,11 @@ pub struct V2 {
 }
 
 impl V2 {
+    pub const UP: V2 = V2 { x: 0, y: -1 };
+    pub const DOWN: V2 = V2 { x: 0, y: 1 };
+    pub const LEFT: V2 = V2 { x: -1, y: 0 };
+    pub const RIGHT: V2 = V2 { x: 1, y: 0 };
+
     pub fn new(x: i32, y: i32) -> V2 {
         V2 { x, y }
     }
@@ -83,11 +88,6 @@ pub enum Direction {
     Right,
 }
 
-static V2_UP: V2 = V2 { x: 0, y: -1 };
-static V2_DOWN: V2 = V2 { x: 0, y: 1 };
-static V2_LEFT: V2 = V2 { x: -1, y: 0 };
-static V2_RIGHT: V2 = V2 { x: 1, y: 0 };
-
 impl Direction {
     pub fn rot_right(&self) -> Direction {
         match self {
@@ -110,10 +110,10 @@ impl Direction {
     #[allow(clippy::wrong_self_convention)]
     pub fn to_v2(&self) -> &V2 {
         match self {
-            Direction::Up => &V2_UP,
-            Direction::Down => &V2_DOWN,
-            Direction::Left => &V2_LEFT,
-            Direction::Right => &V2_RIGHT,
+            Direction::Up => &V2::UP,
+            Direction::Down => &V2::DOWN,
+            Direction::Left => &V2::LEFT,
+            Direction::Right => &V2::RIGHT,
         }
     }
 }
