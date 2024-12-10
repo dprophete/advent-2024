@@ -63,9 +63,9 @@ fn p2_is_equation_valid(total: i64, lst: &[i64]) -> bool {
             })
             .collect();
     }
-    for (acc, str) in nbs.iter() {
+    for (acc, _str) in nbs.iter() {
         if *acc == total {
-            println!("{} = {}", acc, str);
+            // println!("{} = {}", acc, str);
             return true;
         }
     }
@@ -89,11 +89,11 @@ fn p2(input: &str) -> i64 {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    println!("### day07: RPN calculator");
+    pp_day("day07: RPN calculator");
     time_it(p1, "data/07_sample.txt");
     time_it(p1, "data/07_input.txt");
     time_it(p2, "data/07_sample.txt");
-    // time_it(p2, "data/07_input.txt");
+    time_it(p2, "data/07_input.txt"); // takes 3s
 }
 
 #[cfg(test)]

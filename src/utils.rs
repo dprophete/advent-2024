@@ -205,6 +205,10 @@ pub fn bool_to_u32(b: bool) -> u32 {
     b as u32
 }
 
+pub fn pp_day(txt: &str) {
+    println!("\n#### {}", txt);
+}
+
 // time p1/p2 function with the content of the file
 pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
     let start = Instant::now();

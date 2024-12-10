@@ -65,7 +65,7 @@ fn p2(input: &str) -> usize {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    println!("### day02: safe line");
+    pp_day("day02: safe line");
     time_it(p1, "data/02_sample.txt");
     time_it(p1, "data/02_input.txt");
     time_it(p2, "data/02_sample.txt");

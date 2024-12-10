@@ -93,7 +93,7 @@ fn p2(input: &str) -> usize {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    println!("### day10: hiking the trails");
+    pp_day("day10: hiking the trails");
     time_it(p1, "data/10_sample1a.txt");
     time_it(p1, "data/10_sample1b.txt");
     time_it(p1, "data/10_sample1c.txt");

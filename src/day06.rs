@@ -97,11 +97,11 @@ fn p2(input: &str) -> i32 {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    println!("### day06: guard and obstacle");
+    pp_day("day06: guard and obstacle");
     time_it(p1, "data/06_sample.txt");
     time_it(p1, "data/06_input.txt");
     time_it(p2, "data/06_sample.txt");
-    // time_it(p2, "data/06_input.txt"); // take 20s... (1s in release mode)
+    time_it(p2, "data/06_input.txt"); // takes 20s... (1s in release mode)
 }
 
 #[cfg(test)]
