@@ -39,11 +39,11 @@ fn compact_blocks_p1(blocks: &[Option<u32>]) -> Vec<Option<u32>> {
     let mut idx_file = blocks.len() - 1;
 
     while idx_file >= idx_empty {
-        while blocks[idx_empty] != None && idx_file >= idx_empty {
+        while blocks[idx_empty].is_some() && idx_file >= idx_empty {
             compacted.push(blocks[idx_empty]);
             idx_empty += 1;
         }
-        while blocks[idx_file] == None && idx_file >= idx_empty {
+        while blocks[idx_file].is_none() && idx_file >= idx_empty {
             idx_file -= 1;
         }
         if idx_empty >= idx_file {
@@ -81,8 +81,8 @@ fn p1(input: &str) -> usize {
 
 fn find_empty_of_size(blocks: &[Option<u32>], size: usize) -> Option<usize> {
     let mut count = 0;
-    for i in 0..blocks.len() {
-        count = match blocks[i] {
+    for (i, &block) in blocks.iter().enumerate() {
+        count = match block {
             Some(_) => 0,
             None => count + 1,
         };
