@@ -123,21 +123,16 @@ impl Direction {
 //--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone)]
-pub struct Matrix {
-    pub matrix: Vec<Vec<char>>,
+pub struct Matrix<T> {
+    pub matrix: Vec<Vec<T>>,
     pub size: i32,
 }
 
 // base matrix
-impl Matrix {
-    pub fn from_vec(matrix: Vec<Vec<char>>) -> Matrix {
+impl<T: Clone> Matrix<T> {
+    pub fn from_vec(matrix: Vec<Vec<T>>) -> Matrix<T> {
         let size = matrix.len() as i32;
         Matrix { matrix, size }
-    }
-
-    pub fn from_str(content: &str) -> Matrix {
-        let matrix: Vec<Vec<char>> = content.lines().map(|line| line.chars().collect()).collect();
-        Matrix::from_vec(matrix)
     }
 
     pub fn is_in(&self, pos: &V2) -> bool {
@@ -145,27 +140,39 @@ impl Matrix {
     }
 
     // return char at x, y or '.' if out of bounds
-    pub fn get(&self, pos: &V2) -> Option<char> {
+    pub fn get(&self, pos: &V2) -> Option<T> {
         if self.is_in(pos) {
-            Some(self.matrix[pos.y as usize][pos.x as usize])
+            Some(self.matrix[pos.y as usize][pos.x as usize].clone())
         } else {
             None
         }
     }
 
-    pub fn set(&mut self, pos: &V2, c: char) -> &mut Self {
+    pub fn set(&mut self, pos: &V2, value: T) -> &mut Self {
         if self.is_in(pos) {
-            self.matrix[pos.y as usize][pos.x as usize] = c;
+            self.matrix[pos.y as usize][pos.x as usize] = value;
         }
         self
     }
+
+    pub fn from_str(content: &str, convert: fn(char) -> T) -> Matrix<T> {
+        let matrix: Vec<Vec<T>> = content
+            .lines()
+            .map(|line| line.chars().map(convert).collect())
+            .collect();
+        Matrix::from_vec(matrix)
+    }
 }
 
-impl Display for Matrix {
+impl<T: Display + Clone> Display for Matrix<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for y in 0..self.size {
             for x in 0..self.size {
-                write!(f, "{}", self.get(&V2::new(x, y)).unwrap_or('*'))?;
+                if let Some(value) = self.get(&V2::new(x, y)) {
+                    write!(f, "{}", value)?;
+                } else {
+                    write!(f, "*")?;
+                }
             }
             writeln!(f)?;
         }

@@ -1,3 +1,5 @@
+use std::convert::identity;
+
 use crate::utils::*;
 
 //--------------------------------------------------------------------------------
@@ -5,7 +7,7 @@ use crate::utils::*;
 //--------------------------------------------------------------------------------
 
 // part1 matrix extension
-impl Matrix {
+impl Matrix<char> {
     // check if MAS is at (x, y) in the dir (dx, dy)
     fn is_mas_in_dir(&self, pos: V2, dir: V2) -> u32 {
         bool_to_u32(
@@ -33,7 +35,7 @@ impl Matrix {
 }
 
 fn p1(input: &str) -> u32 {
-    let matrix = Matrix::from_str(input);
+    let matrix = Matrix::from_str(input, identity);
     let size: i32 = matrix.size;
 
     let mut sum = 0;
@@ -50,7 +52,7 @@ fn p1(input: &str) -> u32 {
 //--------------------------------------------------------------------------------
 
 // part2 matrix extension
-impl Matrix {
+impl Matrix<char> {
     // check if M-S is around (x, y) in the dir (dx, dy)
     fn is_ms_in_dir(&self, pos: V2, dir: V2) -> bool {
         self.get(&pos.add(&dir)) == Some('M') && self.get(&pos.sub(&dir)) == Some('S')
@@ -67,7 +69,7 @@ impl Matrix {
 }
 
 fn p2(input: &str) -> u32 {
-    let matrix = Matrix::from_str(input);
+    let matrix = Matrix::from_str(input, identity);
     let size: i32 = matrix.size;
 
     let mut sum = 0;

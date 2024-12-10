@@ -1,10 +1,13 @@
 use crate::utils::*;
 
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    convert::identity,
+};
 
 // find antennas: we build a hahsmap: antenna (char) -> list of positions (vec<V2>)
-fn get_antennas(matrix: &Matrix) -> HashMap<char, Vec<V2>> {
+fn get_antennas(matrix: &Matrix<char>) -> HashMap<char, Vec<V2>> {
     let mut antennas: HashMap<char, Vec<V2>> = HashMap::new();
     for y in 0..matrix.size {
         for x in 0..matrix.size {
@@ -43,7 +46,7 @@ fn get_pairs(positions: &[V2]) -> Vec<(V2, V2)> {
 //--------------------------------------------------------------------------------
 
 fn p1(input: &str) -> usize {
-    let matrix = Matrix::from_str(input);
+    let matrix = Matrix::from_str(input, identity);
     let antennas = get_antennas(&matrix);
 
     let mut antinodes: HashSet<V2> = HashSet::new();
@@ -71,7 +74,7 @@ fn p1(input: &str) -> usize {
 //--------------------------------------------------------------------------------
 
 fn p2(input: &str) -> usize {
-    let matrix = Matrix::from_str(input);
+    let matrix = Matrix::from_str(input, identity);
     let antennas = get_antennas(&matrix);
 
     let mut antinodes: HashSet<V2> = HashSet::new();

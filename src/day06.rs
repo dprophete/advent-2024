@@ -1,11 +1,11 @@
 use crate::utils::*;
-use std::collections::HashSet;
+use std::{collections::HashSet, convert::identity};
 
 //--------------------------------------------------------------------------------
 // p1
 //--------------------------------------------------------------------------------
 
-fn find_start(matrix: &Matrix) -> V2 {
+fn find_start(matrix: &Matrix<char>) -> V2 {
     for y in 0..matrix.size {
         for x in 0..matrix.size {
             if matrix.get(&V2::new(x, y)) == Some('^') {
@@ -17,7 +17,7 @@ fn find_start(matrix: &Matrix) -> V2 {
 }
 
 fn p1(input: &str) -> i32 {
-    let mut matrix = Matrix::from_str(input);
+    let mut matrix = Matrix::from_str(input, identity);
 
     let mut pos = find_start(&matrix);
     let mut dir = Direction::Up;
@@ -42,7 +42,7 @@ fn p1(input: &str) -> i32 {
 // p2
 //--------------------------------------------------------------------------------
 
-fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
+fn is_in_loop(matrix: &Matrix<char>, start: V2) -> bool {
     let mut pos = start;
     let mut times_at_pos = HashSet::new();
     let mut dir = Direction::Up;
@@ -63,7 +63,7 @@ fn is_in_loop(matrix: &Matrix, start: V2) -> bool {
 }
 
 fn p2(input: &str) -> i32 {
-    let mut matrix = Matrix::from_str(input);
+    let mut matrix = Matrix::from_str(input, identity);
 
     let start = find_start(&matrix);
     let mut sum = 0;
