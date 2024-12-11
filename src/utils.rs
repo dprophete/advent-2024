@@ -214,11 +214,17 @@ pub fn pp_day(txt: &str) {
 }
 
 // time p1/p2 function with the content of the file
-pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, file: &str) {
+pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, p_str: &str, file: &str) {
     let start = Instant::now();
     let res = run_it(p, file);
     let duration = start.elapsed();
-    println!("[{}] {} -> {}", fmt_duration(duration), file, res);
+    println!(
+        "[{}] {} : {} -> {}",
+        fmt_duration(duration),
+        p_str,
+        file,
+        res
+    );
 }
 
 // run p1/p2 function with the content of the file

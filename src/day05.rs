@@ -84,10 +84,10 @@ fn p2(input: &str) -> i32 {
 
 pub fn run() {
     pp_day("day05: print queue");
-    time_it(p1, "data/05_sample.txt");
-    time_it(p1, "data/05_input.txt");
-    time_it(p2, "data/05_sample.txt");
-    time_it(p2, "data/05_input.txt");
+    time_it(p1, "p1", "data/05_sample.txt");
+    time_it(p1, "p1", "data/05_input.txt");
+    time_it(p2, "p2", "data/05_sample.txt");
+    time_it(p2, "p2", "data/05_input.txt");
 }
 
 #[cfg(test)]

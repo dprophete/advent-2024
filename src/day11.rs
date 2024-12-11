@@ -65,10 +65,10 @@ fn p2(input: &str) -> usize {
 
 pub fn run() {
     pp_day("day11: blinking stones");
-    time_it(p1, "data/11_sample.txt");
-    time_it(p1, "data/11_input.txt");
-    time_it(p2, "data/11_sample.txt");
-    time_it(p2, "data/11_input.txt"); // takes a few seconds
+    time_it(p1, "p1", "data/11_sample.txt");
+    time_it(p1, "p1", "data/11_input.txt");
+    time_it(p2, "p2", "data/11_sample.txt");
+    time_it(p2, "p2", "data/11_input.txt"); // takes a few seconds
 }
 
 #[cfg(test)]
