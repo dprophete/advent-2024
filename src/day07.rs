@@ -44,28 +44,16 @@ fn p1(input: &str) -> i64 {
 //--------------------------------------------------------------------------------
 
 fn p2_is_equation_valid(total: i64, lst: &[i64]) -> bool {
-    // we are keeping the string representation of the equation to be able to print it for
-    // debugging....
-    let mut nbs = vec![(lst[0], format!("{}", lst[0]))];
+    let mut nbs = vec![lst[0]];
 
     for nx in lst.iter().skip(1) {
         nbs = nbs
             .iter()
-            .flat_map(|(acc, str)| {
-                vec![
-                    (acc + nx, format!("{} + {}", str, nx)),
-                    (acc * nx, format!("{} * {}", str, nx)),
-                    (
-                        toi64(&format!("{}{}", acc, nx)),
-                        format!("{} || {}", str, nx),
-                    ),
-                ]
-            })
+            .flat_map(|acc| vec![acc + nx, acc * nx, toi64(&format!("{}{}", acc, nx))])
             .collect();
     }
-    for (acc, _str) in nbs.iter() {
-        if *acc == total {
-            // println!("{} = {}", acc, str);
+    for &acc in nbs.iter() {
+        if acc == total {
             return true;
         }
     }
