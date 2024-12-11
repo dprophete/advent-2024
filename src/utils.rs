@@ -12,6 +12,10 @@ pub fn toi64(s: &str) -> i64 {
     s.parse::<i64>().unwrap()
 }
 
+pub fn tou64(s: &str) -> u64 {
+    s.parse::<u64>().unwrap()
+}
+
 pub fn toi32(s: &str) -> i32 {
     s.parse::<i32>().unwrap()
 }
