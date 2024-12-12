@@ -44,9 +44,15 @@ fn get_area_for_region(region: &HashSet<V2>) -> usize {
 
 fn get_perimeter_for_region(region: &HashSet<V2>) -> usize {
     let mut sides = HashSet::new();
-    for pos in region {
+
+    // we scale the region by 2 and put the fences in the 'middle'
+    let scaled_region = region
+        .iter()
+        .map(|pos| pos.scale(2))
+        .collect::<HashSet<_>>();
+    for pos in scaled_region {
         for dir in [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT] {
-            let side = pos.scale(2).add(&dir);
+            let side = pos.add(&dir);
             if sides.contains(&side) {
                 sides.remove(&side);
             } else {
@@ -72,11 +78,27 @@ fn p1(input: &str) -> usize {
 // p2
 //--------------------------------------------------------------------------------
 
+// true if a fence is on top of the region
+fn is_top_fence(pos: &V2, scaled_region: &HashSet<V2>) -> bool {
+    scaled_region.contains(&pos.add(&V2::DOWN))
+}
+
+// true if a fence is on the left of the region
+fn is_left_fence(pos: &V2, scaled_region: &HashSet<V2>) -> bool {
+    scaled_region.contains(&pos.add(&V2::RIGHT))
+}
+
 fn get_nb_sides_for_region(region: &HashSet<V2>) -> usize {
     let mut sides = HashSet::new();
-    for pos in region {
+
+    // we scale the region by 2 and put the fences in the 'middle'
+    let scaled_region = region
+        .iter()
+        .map(|pos| pos.scale(2))
+        .collect::<HashSet<_>>();
+    for pos in scaled_region.clone() {
         for dir in [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT] {
-            let side = pos.scale(2).add(&dir);
+            let side = pos.add(&dir);
             if sides.contains(&side) {
                 sides.remove(&side);
             } else {
@@ -85,19 +107,35 @@ fn get_nb_sides_for_region(region: &HashSet<V2>) -> usize {
         }
     }
 
-    sides.len()
+    // same as p1, but we make sure the fences are on the same side
+    let mut discarded = HashSet::new();
+    for side in sides.clone() {
+        if side.x % 2 == 0 {
+            // horizontal
+            let right = side.add(&V2::RIGHT.scale(2));
+            let is_top_fence1 = bool_to_u32(is_top_fence(&side, &scaled_region));
+            let is_top_fence2 = bool_to_u32(is_top_fence(&right, &scaled_region));
+            if sides.contains(&right) && (is_top_fence1 == is_top_fence2) {
+                discarded.insert(right);
+            }
+        } else {
+            // vertical
+            let down = side.add(&V2::DOWN.scale(2));
+            let is_left_fence1 = bool_to_u32(is_left_fence(&side, &scaled_region));
+            let is_left_fence2 = bool_to_u32(is_left_fence(&down, &scaled_region));
+            if sides.contains(&down) && (is_left_fence1 == is_left_fence2) {
+                discarded.insert(down);
+            }
+        }
+    }
+    sides.len() - discarded.len()
 }
 
 fn p2(input: &str) -> usize {
     let matrix = Matrix::from_str(input, identity);
     let regions = find_regions(&matrix);
     let mut sum = 0;
-    for (c, region) in &regions {
-        println!(
-            "[DDA] day12:: region {} -> {}",
-            c,
-            get_nb_sides_for_region(region)
-        );
+    for (_c, region) in &regions {
         sum += get_area_for_region(region) * get_nb_sides_for_region(region);
     }
     sum
@@ -109,12 +147,8 @@ fn p2(input: &str) -> usize {
 
 pub fn run() {
     pp_day("day12: Garden Groups");
-    // time_it(p1, "p1", "data/12_sample1a.txt");
-    // time_it(p1, "p1", "data/12_sample1b.txt");
-    // time_it(p1, "p1", "data/12_sample1c.txt");
-    // time_it(p1, "p1", "data/12_input.txt");
-    time_it(p2, "p2", "data/12_sample1a.txt");
-    // time_it(p2, "p2", "data/12_input.txt"); // takes a few seconds
+    time_it(p1, "p1", "data/12_input.txt");
+    time_it(p2, "p2", "data/12_input.txt");
 }
 
 #[cfg(test)]
