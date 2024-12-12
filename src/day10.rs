@@ -1,4 +1,3 @@
-/// hiking the trails
 use crate::utils::*;
 
 //--------------------------------------------------------------------------------
@@ -28,16 +27,6 @@ impl Matrix<i32> {
                 res.push(nx);
             }
         }
-
-        // for dir in [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT] {
-        //     let nx = pos.add(&dir);
-        //     match self.get(&nx) {
-        //         Some(v) if v == val + 1 => {
-        //             res.push(nx);
-        //         }
-        //         _ => {}
-        //     }
-        // }
         res
     }
 
@@ -100,16 +89,7 @@ fn p2(input: &str) -> usize {
 
 pub fn run() {
     pp_day("day10: hiking the trails");
-    time_it(p1, "p1", "data/10_sample1a.txt");
-    time_it(p1, "p1", "data/10_sample1b.txt");
-    time_it(p1, "p1", "data/10_sample1c.txt");
-    time_it(p1, "p1", "data/10_sample1d.txt");
-    time_it(p1, "p1", "data/10_sample1e.txt");
     time_it(p1, "p1", "data/10_input.txt");
-    time_it(p2, "p2", "data/10_sample2a.txt");
-    time_it(p2, "p2", "data/10_sample2b.txt");
-    time_it(p2, "p2", "data/10_sample2c.txt");
-    time_it(p2, "p2", "data/10_sample1e.txt");
     time_it(p2, "p2", "data/10_input.txt");
 }
 

@@ -1,4 +1,3 @@
-/// sort lists
 use crate::utils::*;
 
 //--------------------------------------------------------------------------------
@@ -44,8 +43,6 @@ fn p2(input: &str) -> i32 {
 pub fn run() {
     pp_day("day01: sort lists");
     time_it(p1, "p1", "data/01_sample.txt");
-    time_it(p1, "p1", "data/01_sample.txt");
-    time_it(p2, "p2", "data/01_sample.txt");
     time_it(p2, "p2", "data/01_input.txt");
 }
 

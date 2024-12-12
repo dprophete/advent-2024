@@ -1,4 +1,3 @@
-/// xmas pattern
 use std::convert::identity;
 
 use crate::utils::*;
@@ -88,9 +87,7 @@ fn p2(input: &str) -> u32 {
 
 pub fn run() {
     pp_day("day04: xmas pattern");
-    time_it(p1, "p1", "data/04_sample.txt");
     time_it(p1, "p1", "data/04_input.txt");
-    time_it(p2, "p2", "data/04_sample.txt");
     time_it(p2, "p2", "data/04_input.txt");
 }
 

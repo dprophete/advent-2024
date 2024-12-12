@@ -1,4 +1,3 @@
-/// guard and obstacle
 use crate::utils::*;
 use std::{collections::HashSet, convert::identity};
 
@@ -98,9 +97,7 @@ fn p2(input: &str) -> i32 {
 
 pub fn run() {
     pp_day("day06: guard and obstacle");
-    time_it(p1, "p1", "data/06_sample.txt");
     time_it(p1, "p1", "data/06_input.txt");
-    time_it(p2, "p2", "data/06_sample.txt");
     time_it(p2, "p2", "data/06_input.txt"); // takes 20s... (1s in release mode)
 }
 
