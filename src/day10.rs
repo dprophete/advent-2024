@@ -23,15 +23,21 @@ impl Matrix<i32> {
     fn get_nxs(&self, pos: &V2) -> Vec<V2> {
         let mut res = vec![];
         let val = self.get(pos).unwrap();
-        for dir in [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT] {
-            let nx = pos.add(&dir);
-            match self.get(&nx) {
-                Some(v) if v == val + 1 => {
-                    res.push(nx);
-                }
-                _ => {}
+        for nx in self.neighbors(pos) {
+            if self.get(&nx).unwrap() == val + 1 {
+                res.push(nx);
             }
         }
+
+        // for dir in [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT] {
+        //     let nx = pos.add(&dir);
+        //     match self.get(&nx) {
+        //         Some(v) if v == val + 1 => {
+        //             res.push(nx);
+        //         }
+        //         _ => {}
+        //     }
+        // }
         res
     }
 

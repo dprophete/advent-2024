@@ -52,7 +52,7 @@ impl V2 {
         V2::new(v[0], v[1])
     }
 
-    pub fn times(&self, n: i32) -> V2 {
+    pub fn scale(&self, n: i32) -> V2 {
         V2::new(self.x * n, self.y * n)
     }
 
@@ -66,6 +66,13 @@ impl V2 {
 
     pub fn move_to_dir(&self, dir: &Direction) -> V2 {
         self.add(dir.to_v2())
+    }
+
+    pub fn neighbors(&self, pos: &V2) -> Vec<V2> {
+        [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT]
+            .iter()
+            .map(|dir| pos.add(&dir))
+            .collect()
     }
 }
 
@@ -165,6 +172,14 @@ impl<T: Clone> Matrix<T> {
             .map(|line| line.chars().map(convert).collect())
             .collect();
         Matrix::from_vec(matrix)
+    }
+
+    pub fn neighbors(&self, pos: &V2) -> Vec<V2> {
+        pos.neighbors(pos)
+            .iter()
+            .filter(|nx| self.is_in(nx))
+            .cloned()
+            .collect()
     }
 }
 

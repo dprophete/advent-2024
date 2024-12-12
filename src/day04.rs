@@ -13,8 +13,8 @@ impl Matrix<char> {
     fn is_mas_in_dir(&self, pos: V2, dir: V2) -> u32 {
         bool_to_u32(
             self.get(&pos.add(&dir)) == Some('M')
-                && self.get(&pos.add(&dir.times(2))) == Some('A')
-                && self.get(&pos.add(&dir.times(3))) == Some('S'),
+                && self.get(&pos.add(&dir.scale(2))) == Some('A')
+                && self.get(&pos.add(&dir.scale(3))) == Some('S'),
         )
     }
 
