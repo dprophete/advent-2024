@@ -21,11 +21,11 @@ fn p1(input: &str) -> i32 {
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2(input: &str) -> i32 {
-    // let (left, right): (Vec<i32>, Vec<i32>) = input.lines().map(parse_line).unzip();
-    let sum = 0;
-    sum
-}
+// fn p2(input: &str) -> i32 {
+//     // let (left, right): (Vec<i32>, Vec<i32>) = input.lines().map(parse_line).unzip();
+//     let sum = 0;
+//     sum
+// }
 
 //--------------------------------------------------------------------------------
 // main
@@ -48,7 +48,7 @@ mod tests {
     #[test]
     fn test() {
         assert_eq!(run_it(p1, "data/12_samplea.txt"), 140);
-        assert_eq!(run_it(p2, "data/12_sampleb.txt"), 772);
-        assert_eq!(run_it(p2, "data/12_samplec.txt"), 1930);
+        assert_eq!(run_it(p1, "data/12_sampleb.txt"), 772);
+        assert_eq!(run_it(p1, "data/12_samplec.txt"), 1930);
     }
 }
