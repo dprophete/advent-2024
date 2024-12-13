@@ -20,6 +20,10 @@ pub fn toi32(s: &str) -> i32 {
     s.parse::<i32>().unwrap()
 }
 
+pub fn toi128(s: &str) -> i128 {
+    s.parse::<i128>().unwrap()
+}
+
 pub fn tou32(s: &str) -> u32 {
     s.parse::<u32>().unwrap()
 }
