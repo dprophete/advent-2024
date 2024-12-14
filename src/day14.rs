@@ -40,7 +40,7 @@ fn move_robots(robots: &[Robot], area: &V2) -> Vec<Robot> {
     robots.iter().map(|robot| move_robot(robot, area)).collect()
 }
 
-fn p1(area: V2, input: &str) -> i64 {
+fn p1(area: V2, input: &str) -> i32 {
     let mut robots = parse_robots(input);
     for _ in 0..100 {
         robots = move_robots(&robots, &area);
@@ -53,7 +53,7 @@ fn p1(area: V2, input: &str) -> i64 {
     let mut bot_right = 0;
 
     let center = V2::new((area.x - 1) / 2, (area.y - 1) / 2);
-    for robot in robots {
+    for robot in &robots {
         if robot.p.x == center.x || robot.p.y == center.y {
             continue;
         }
@@ -72,13 +72,37 @@ fn p1(area: V2, input: &str) -> i64 {
 // p2
 //--------------------------------------------------------------------------------
 
-// fn p2(input: &str) -> i64 {
-//     let mut sum = 0;
-//     for machine in parse_machines(input) {
-//         sum += compute_cost(&machine, 10000000000000_i64, false);
-//     }
-//     sum
-// }
+fn display_robots(robots: &[Robot], area: &V2) {
+    let mut grid = vec![vec![0; area.x as usize]; area.y as usize];
+    for robot in robots {
+        grid[robot.p.y as usize][robot.p.x as usize] += 1;
+    }
+    for row in grid {
+        for cell in row {
+            if cell == 0 {
+                print!(".");
+            } else {
+                print!("X");
+            }
+        }
+        println!();
+    }
+}
+
+fn p2(area: V2, input: &str) -> i32 {
+    // part 2 is tricky...
+    // basically, I ran it 10000 times, outputted everthing in a file,
+    // and searched for a row of XXXXXXXXXXXXX
+    //
+    //   cargo r | grep -B 100 XXXXXXXXXXXXXXXX | less
+    let mut robots = parse_robots(input);
+    for i in 0..10000 {
+        println!("\n----------------------- {}", i);
+        display_robots(&robots, &area);
+        robots = move_robots(&robots, &area);
+    }
+    10
+}
 
 //--------------------------------------------------------------------------------
 // main
@@ -96,6 +120,11 @@ pub fn run() {
         "p1",
         "data/14_input.txt",
     );
+    // time_it(
+    //     |input| p2(V2::new(101, 103), input),
+    //     "p1",
+    //     "data/14_input.txt",
+    // );
 }
 
 #[cfg(test)]
@@ -108,6 +137,5 @@ mod tests {
             run_it(|input| p1(V2::new(11, 7), input), "data/14_sample.txt"),
             12
         );
-        // assert_eq!(run_it(p2, "data/14_sample.txt"), 875318608908);
     }
 }
