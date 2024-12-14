@@ -95,6 +95,6 @@ mod tests {
     #[test]
     fn test() {
         assert_eq!(run_it(p1, "data/13_sample.txt"), 480);
-        assert_eq!(run_it(p2, "data/13_input.txt"), 73458657399094);
+        assert_eq!(run_it(p2, "data/13_sample.txt"), 875318608908);
     }
 }
