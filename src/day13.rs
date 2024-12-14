@@ -22,10 +22,12 @@ fn parse_machines(input: &str) -> Vec<Machine> {
     input
         .split("\n\n")
         .map(|block| {
-            let mut lines = block.lines();
-            let btn_a = parse_dirs(lines.next().unwrap());
-            let btn_b = parse_dirs(lines.next().unwrap());
-            let prize = parse_dirs(lines.next().unwrap());
+            let lines = block.lines().map(parse_dirs).collect::<Vec<_>>();
+            let &[btn_a, btn_b, prize] = lines.array_chunks::<3>().next().unwrap();
+            // let mut lines = block.lines();
+            // let btn_a = parse_dirs(lines.next().unwrap());
+            // let btn_b = parse_dirs(lines.next().unwrap());
+            // let prize = parse_dirs(lines.next().unwrap());
             Machine {
                 btn_a,
                 btn_b,
