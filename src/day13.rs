@@ -11,7 +11,7 @@ struct Machine {
     prize: (i64, i64),
 }
 
-// "Button A: X+26, Y+66" -> (26, 66)
+// parse directions: "Button A: X+26, Y+66" -> (26, 66)
 fn parse_dirs(line: &str) -> (i64, i64) {
     let (_, dirs) = line.split_once(": ").unwrap();
     let (x_dir, y_dir) = dirs.split_once(", ").unwrap();
