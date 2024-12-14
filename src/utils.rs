@@ -64,6 +64,10 @@ impl V2 {
         V2::new(self.x + other.x, self.y + other.y)
     }
 
+    pub fn modulo(&self, other: &V2) -> V2 {
+        V2::new(self.x.rem_euclid(other.x), self.y.rem_euclid(other.y))
+    }
+
     pub fn sub(&self, other: &V2) -> V2 {
         V2::new(self.x - other.x, self.y - other.y)
     }
