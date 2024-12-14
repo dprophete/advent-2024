@@ -23,12 +23,9 @@ fn parse_machines(input: &str) -> Vec<Machine> {
         .split("\n\n")
         .map(|block| {
             let mut lines = block.lines();
-            let line_a = lines.next().unwrap();
-            let line_b = lines.next().unwrap();
-            let line_prize = lines.next().unwrap();
-            let btn_a = parse_dirs(line_a);
-            let btn_b = parse_dirs(line_b);
-            let prize = parse_dirs(line_prize);
+            let btn_a = parse_dirs(lines.next().unwrap());
+            let btn_b = parse_dirs(lines.next().unwrap());
+            let prize = parse_dirs(lines.next().unwrap());
             Machine {
                 btn_a,
                 btn_b,
@@ -38,7 +35,7 @@ fn parse_machines(input: &str) -> Vec<Machine> {
         .collect()
 }
 
-fn compute_cost(machine: &Machine, offset: i64, enforce_limit: bool) -> u64 {
+fn compute_cost(machine: &Machine, offset: i64, enforce_limit: bool) -> i64 {
     let Machine {
         btn_a: (ax, ay),
         btn_b: (bx, by),
@@ -46,18 +43,20 @@ fn compute_cost(machine: &Machine, offset: i64, enforce_limit: bool) -> u64 {
     } = machine;
     let (px, py) = (px + offset, py + offset);
     let det = ax * by - ay * bx;
-    let nb_a = (by * px - bx * py) as f64 / det as f64;
-    let nb_b = (ax * py - ay * px) as f64 / det as f64;
-    if enforce_limit && (nb_a > 100.0 || nb_b > 100.0) {
+    let num_a = by * px - bx * py;
+    let num_b = ax * py - ay * px;
+    if num_a % det != 0 || num_b % det != 0 {
         return 0;
     }
-    if nb_a.fract() != 0.0 || nb_b.fract() != 0.0 {
+    let nb_a = num_a / det;
+    let nb_b = num_b / det;
+    if enforce_limit && (nb_a > 100 || nb_b > 100) {
         return 0;
     }
-    (nb_a as u64) * 3 + (nb_b as u64) * 1
+    nb_a * 3 + nb_b * 1
 }
 
-fn p1(input: &str) -> u64 {
+fn p1(input: &str) -> i64 {
     let mut sum = 0;
     for machine in parse_machines(input) {
         sum += compute_cost(&machine, 0, true);
@@ -69,7 +68,7 @@ fn p1(input: &str) -> u64 {
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2(input: &str) -> u64 {
+fn p2(input: &str) -> i64 {
     let mut sum = 0;
     for machine in parse_machines(input) {
         sum += compute_cost(&machine, 10000000000000_i64, false);
