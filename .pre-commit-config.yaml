@@ -14,4 +14,4 @@ repos:
                 - --contrast-improvement-type=dark
                 - --show-total-stars-for-all-years=no
                 - --overwrite-year=2024
-                - --count-as-solved-when=on_leaderboard
+                # - --count-as-solved-when=on_leaderboard
