@@ -13,7 +13,7 @@ struct Robot {
 fn parse_dirs(line: &str) -> V2 {
     let (_, dirs) = line.split_once("=").unwrap();
     let (x_dir, y_dir) = dirs.split_once(",").unwrap();
-    V2::new(toi32(&x_dir), toi32(&y_dir))
+    V2::new(toi32(x_dir), toi32(y_dir))
 }
 
 fn parse_robots(input: &str) -> Vec<Robot> {
