@@ -1,4 +1,7 @@
 use crate::utils::*;
+//--------------------------------------------------------------------------------
+// p1
+//--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 struct Robot {
@@ -6,44 +9,41 @@ struct Robot {
     v: V2,
 }
 
-//--------------------------------------------------------------------------------
-// p1
-//--------------------------------------------------------------------------------
+impl Robot {
+    pub fn from_str(s: &str) -> Robot {
+        let (lhs, rhs) = s.split_once(" ").unwrap();
+        Robot {
+            p: parse_v2(lhs),
+            v: parse_v2(rhs),
+        }
+    }
 
-fn parse_dirs(line: &str) -> V2 {
+    pub fn step(&self, area: &V2) -> Robot {
+        Robot {
+            p: self.p.add(&self.v).modulo(area),
+            v: self.v,
+        }
+    }
+}
+
+fn parse_v2(line: &str) -> V2 {
     let (_, dirs) = line.split_once("=").unwrap();
     let (x_dir, y_dir) = dirs.split_once(",").unwrap();
     V2::new(toi32(x_dir), toi32(y_dir))
 }
 
 fn parse_robots(input: &str) -> Vec<Robot> {
-    input
-        .lines()
-        .map(|line| {
-            let (lhs, rhs) = line.split_once(" ").unwrap();
-            Robot {
-                p: parse_dirs(lhs),
-                v: parse_dirs(rhs),
-            }
-        })
-        .collect()
+    input.lines().map(Robot::from_str).collect()
 }
 
-fn move_robot(robot: &Robot, area: &V2) -> Robot {
-    Robot {
-        p: robot.p.add(&robot.v).modulo(area),
-        v: robot.v,
-    }
-}
-
-fn move_robots(robots: &[Robot], area: &V2) -> Vec<Robot> {
-    robots.iter().map(|robot| move_robot(robot, area)).collect()
+fn step_robots(robots: &[Robot], area: &V2) -> Vec<Robot> {
+    robots.iter().map(|robot| robot.step(area)).collect()
 }
 
 fn p1(area: V2, input: &str) -> i32 {
     let mut robots = parse_robots(input);
     for _ in 0..100 {
-        robots = move_robots(&robots, &area);
+        robots = step_robots(&robots, &area);
     }
 
     // compute quadrants
@@ -72,36 +72,39 @@ fn p1(area: V2, input: &str) -> i32 {
 // p2
 //--------------------------------------------------------------------------------
 
-fn display_robots(robots: &[Robot], area: &V2) {
-    let mut grid = vec![vec![0; area.x as usize]; area.y as usize];
+fn contains_line(robots: &[Robot], area: &V2) -> bool {
+    let mut grid = vec![vec!['.'; area.x as usize]; area.y as usize];
     for robot in robots {
-        grid[robot.p.y as usize][robot.p.x as usize] += 1;
+        if grid[robot.p.y as usize][robot.p.x as usize] == '.' {
+            grid[robot.p.y as usize][robot.p.x as usize] = 'X';
+        }
     }
     for row in grid {
-        for cell in row {
-            if cell == 0 {
-                print!(".");
-            } else {
-                print!("X");
-            }
+        let str = row.iter().collect::<String>();
+        // println!("{}", str);
+        if str.contains("XXXXXXXXXXXXXXXXXXX") {
+            return true;
         }
-        println!();
     }
+    return false;
 }
 
 fn p2(area: V2, input: &str) -> i32 {
-    // part 2 is tricky...
-    // basically, I ran it 10000 times, outputted everthing in a file,
-    // and searched for a row of XXXXXXXXXXXXX
-    //
-    //   cargo r | grep -B 100 XXXXXXXXXXXXXXXX | less
+    // part 2 was tricky...
+    //   this is what I did:
+    //   basically, I ran it 10000 times, outputted everthing in a file,
+    //   and searched for a row of XXXXXXXXXXXXX
+    //     cargo r | grep -B 100 XXXXXXXXXXXXXXXX | less
+
+    // now programatically
     let mut robots = parse_robots(input);
     for i in 0..10000 {
-        println!("\n----------------------- {}", i);
-        display_robots(&robots, &area);
-        robots = move_robots(&robots, &area);
+        if contains_line(&robots, &area) {
+            return i;
+        }
+        robots = step_robots(&robots, &area);
     }
-    10
+    -1
 }
 
 //--------------------------------------------------------------------------------
@@ -120,11 +123,11 @@ pub fn run() {
         "p1",
         "data/14_input.txt",
     );
-    // time_it(
-    //     |input| p2(V2::new(101, 103), input),
-    //     "p1",
-    //     "data/14_input.txt",
-    // );
+    time_it(
+        |input| p2(V2::new(101, 103), input),
+        "p1",
+        "data/14_input.txt",
+    );
 }
 
 #[cfg(test)]
@@ -136,6 +139,10 @@ mod tests {
         assert_eq!(
             run_it(|input| p1(V2::new(11, 7), input), "data/14_sample.txt"),
             12
+        );
+        assert_eq!(
+            run_it(|input| p2(V2::new(101, 103), input), "data/14_input.txt"),
+            6516
         );
     }
 }
