@@ -1,6 +1,5 @@
 #![feature(array_chunks)]
 #![allow(dead_code)]
-#![feature(f128)]
 
 mod utils;
 
