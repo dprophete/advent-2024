@@ -55,7 +55,7 @@ fn compute_cost(machine: &Machine, offset: i64, enforce_limit: bool) -> i64 {
     if enforce_limit && (nb_a > 100 || nb_b > 100) {
         return 0;
     }
-    nb_a * 3 + nb_b * 1
+    nb_a * 3 + nb_b
 }
 
 fn p1(input: &str) -> i64 {

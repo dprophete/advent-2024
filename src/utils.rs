@@ -75,7 +75,7 @@ impl V2 {
     pub fn neighbors(&self, pos: &V2) -> Vec<V2> {
         [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT]
             .iter()
-            .map(|dir| pos.add(&dir))
+            .map(|dir| pos.add(dir))
             .collect()
     }
 }
