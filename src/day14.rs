@@ -42,13 +42,6 @@ fn move_robots(robots: &[Robot], area: &V2) -> Vec<Robot> {
 
 fn p1(area: V2, input: &str) -> i64 {
     let mut robots = parse_robots(input);
-    // let area = if input == "data/14_sample.txt" {
-    //     println!("[DDA] day14:: p1: using sample area");
-    //     V2::new(11, 7)
-    // } else {
-    //     println!("[DDA] day14:: p1: using input area");
-    //     V2::new(101, 103)
-    // };
     for _ in 0..100 {
         robots = move_robots(&robots, &area);
     }
@@ -103,8 +96,6 @@ pub fn run() {
         "p1",
         "data/14_input.txt",
     );
-    // time_it(p1, "p1", "data/14_input.txt");
-    // time_it(p2, "p2", "data/14_input.txt");
 }
 
 #[cfg(test)]
