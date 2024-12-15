@@ -141,17 +141,40 @@ impl Direction {
 // matrix
 //--------------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Matrix<T> {
     pub matrix: Vec<Vec<T>>,
     pub size: i32,
 }
 
 // base matrix
-impl<T: Clone> Matrix<T> {
+impl<T: Clone + PartialEq> Matrix<T> {
     pub fn from_vec(matrix: Vec<Vec<T>>) -> Matrix<T> {
         let size = matrix.len() as i32;
         Matrix { matrix, size }
+    }
+
+    pub fn find_first(&self, value: T) -> Option<V2> {
+        for y in 0..self.size {
+            for x in 0..self.size {
+                if self.matrix[y as usize][x as usize] == value {
+                    return Some(V2::new(x, y));
+                }
+            }
+        }
+        None
+    }
+
+    pub fn find_all(&self, value: T) -> Vec<V2> {
+        let mut res = vec![];
+        for y in 0..self.size {
+            for x in 0..self.size {
+                if self.matrix[y as usize][x as usize] == value {
+                    res.push(V2::new(x, y));
+                }
+            }
+        }
+        res
     }
 
     pub fn is_in(&self, pos: &V2) -> bool {
@@ -191,7 +214,7 @@ impl<T: Clone> Matrix<T> {
     }
 }
 
-impl<T: Display + Clone> Display for Matrix<T> {
+impl<T: Display + Clone + PartialEq> Display for Matrix<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for y in 0..self.size {
             for x in 0..self.size {

@@ -5,21 +5,10 @@ use std::{collections::HashSet, convert::identity};
 // p1
 //--------------------------------------------------------------------------------
 
-fn find_start(matrix: &Matrix<char>) -> V2 {
-    for y in 0..matrix.size {
-        for x in 0..matrix.size {
-            if matrix.get(&V2::new(x, y)) == Some('^') {
-                return V2::new(x, y);
-            }
-        }
-    }
-    V2::new(-1, -1)
-}
-
 fn p1(input: &str) -> i32 {
     let mut matrix = Matrix::from_str(input, identity);
 
-    let mut pos = find_start(&matrix);
+    let mut pos = matrix.find_first('^').unwrap();
     let mut dir = Direction::Up;
     let mut sum = 1;
     loop {
@@ -65,7 +54,7 @@ fn is_in_loop(matrix: &Matrix<char>, start: V2) -> bool {
 fn p2(input: &str) -> i32 {
     let mut matrix = Matrix::from_str(input, identity);
 
-    let start = find_start(&matrix);
+    let start = matrix.find_first('^').unwrap();
     let mut sum = 0;
 
     let mut dir = Direction::Up;
