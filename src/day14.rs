@@ -29,12 +29,6 @@ impl Robot {
     }
 }
 
-fn parse_v2(line: &str) -> V2 {
-    let (_, dirs) = line.split_once("=").unwrap();
-    let (x_dir, y_dir) = dirs.split_once(",").unwrap();
-    V2::new(toi32(x_dir), toi32(y_dir))
-}
-
 fn parse_robots(input: &str) -> Vec<Robot> {
     input.lines().map(Robot::from_str).collect()
 }
