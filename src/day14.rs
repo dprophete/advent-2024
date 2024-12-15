@@ -1,3 +1,5 @@
+use regex::Regex;
+
 use crate::utils::*;
 //--------------------------------------------------------------------------------
 // p1
@@ -11,10 +13,11 @@ struct Robot {
 
 impl Robot {
     pub fn from_str(s: &str) -> Robot {
-        let (lhs, rhs) = s.split_once(" ").unwrap();
+        let re = Regex::new(r"p=(-?\d+),(-?\d+) v=(-?\d+),(-?\d+)").unwrap();
+        let (_, [px, py, vx, vy]) = re.captures(s).unwrap().extract();
         Robot {
-            p: parse_v2(lhs),
-            v: parse_v2(rhs),
+            p: V2::new(toi32(px), toi32(py)),
+            v: V2::new(toi32(vx), toi32(vy)),
         }
     }
 
@@ -86,7 +89,7 @@ fn contains_line(robots: &[Robot], area: &V2) -> bool {
             return true;
         }
     }
-    return false;
+    false
 }
 
 fn p2(area: V2, input: &str) -> i32 {
