@@ -8,8 +8,8 @@ impl Matrix<i32> {
     // find all the starting points
     fn get_starts(&self) -> Vec<V2> {
         let mut starts = vec![];
-        for y in 0..self.size {
-            for x in 0..self.size {
+        for y in 0..self.height {
+            for x in 0..self.width {
                 if self.get(&V2::new(x, y)) == Some(0) {
                     starts.push(V2::new(x, y));
                 }

@@ -9,8 +9,8 @@ use std::{
 // find antennas: we build a hahsmap: antenna (char) -> list of positions (vec<V2>)
 fn get_antennas(matrix: &Matrix<char>) -> HashMap<char, Vec<V2>> {
     let mut antennas: HashMap<char, Vec<V2>> = HashMap::new();
-    for y in 0..matrix.size {
-        for x in 0..matrix.size {
+    for y in 0..matrix.height {
+        for x in 0..matrix.width {
             let pos = V2::new(x, y);
             match matrix.get(&pos) {
                 None | Some('.') => {}

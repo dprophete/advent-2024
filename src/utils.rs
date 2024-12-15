@@ -144,19 +144,25 @@ impl Direction {
 #[derive(Debug, Clone, PartialEq)]
 pub struct Matrix<T> {
     pub matrix: Vec<Vec<T>>,
-    pub size: i32,
+    pub width: i32,
+    pub height: i32,
 }
 
 // base matrix
 impl<T: Clone + PartialEq> Matrix<T> {
     pub fn from_vec(matrix: Vec<Vec<T>>) -> Matrix<T> {
-        let size = matrix.len() as i32;
-        Matrix { matrix, size }
+        let height = matrix.len() as i32;
+        let width = matrix[0].len() as i32;
+        Matrix {
+            matrix,
+            width,
+            height,
+        }
     }
 
     pub fn find_first(&self, value: T) -> Option<V2> {
-        for y in 0..self.size {
-            for x in 0..self.size {
+        for y in 0..self.height {
+            for x in 0..self.width {
                 if self.matrix[y as usize][x as usize] == value {
                     return Some(V2::new(x, y));
                 }
@@ -167,8 +173,8 @@ impl<T: Clone + PartialEq> Matrix<T> {
 
     pub fn find_all(&self, value: T) -> Vec<V2> {
         let mut res = vec![];
-        for y in 0..self.size {
-            for x in 0..self.size {
+        for y in 0..self.height {
+            for x in 0..self.width {
                 if self.matrix[y as usize][x as usize] == value {
                     res.push(V2::new(x, y));
                 }
@@ -178,7 +184,7 @@ impl<T: Clone + PartialEq> Matrix<T> {
     }
 
     pub fn is_in(&self, pos: &V2) -> bool {
-        pos.x >= 0 && pos.y >= 0 && pos.x < self.size && pos.y < self.size
+        pos.x >= 0 && pos.y >= 0 && pos.x < self.width && pos.y < self.height
     }
 
     // return char at x, y or '.' if out of bounds
@@ -216,8 +222,8 @@ impl<T: Clone + PartialEq> Matrix<T> {
 
 impl<T: Display + Clone + PartialEq> Display for Matrix<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for y in 0..self.size {
-            for x in 0..self.size {
+        for y in 0..self.height {
+            for x in 0..self.width {
                 if let Some(value) = self.get(&V2::new(x, y)) {
                     write!(f, "{}", value)?;
                 } else {

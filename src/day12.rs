@@ -8,8 +8,8 @@ use std::{collections::HashSet, convert::identity};
 fn find_regions(matrix: &Matrix<char>) -> Vec<(char, HashSet<V2>)> {
     let mut matrix = matrix.clone();
     let mut regions = vec![];
-    for j in 0..matrix.size {
-        for i in 0..matrix.size {
+    for j in 0..matrix.height {
+        for i in 0..matrix.width {
             let pos = V2::new(i, j);
             match matrix.get(&pos) {
                 Some('#') => {}

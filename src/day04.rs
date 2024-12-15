@@ -36,11 +36,10 @@ impl Matrix<char> {
 
 fn p1(input: &str) -> u32 {
     let matrix = Matrix::from_str(input, identity);
-    let size: i32 = matrix.size;
 
     let mut sum = 0;
-    for y in 0..size {
-        for x in 0..size {
+    for y in 0..matrix.height {
+        for x in 0..matrix.width {
             sum += matrix.nb_xmas_at_point(V2::new(x, y))
         }
     }
@@ -70,11 +69,10 @@ impl Matrix<char> {
 
 fn p2(input: &str) -> u32 {
     let matrix = Matrix::from_str(input, identity);
-    let size: i32 = matrix.size;
 
     let mut sum = 0;
-    for y in 0..size {
-        for x in 0..size {
+    for y in 0..matrix.height {
+        for x in 0..matrix.width {
             sum += bool_to_u32(matrix.is_x_dash_mas_at_point(V2::new(x, y)))
         }
     }
