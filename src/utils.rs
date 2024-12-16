@@ -72,7 +72,7 @@ impl V2 {
         V2::new(self.x - other.x, self.y - other.y)
     }
 
-    pub fn move_to_dir(&self, dir: &Direction) -> V2 {
+    pub fn move_to_dir(&self, dir: &Dir) -> V2 {
         self.add(dir.to_v2())
     }
 
@@ -100,39 +100,39 @@ pub struct V3 {
 //--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
-pub enum Direction {
+pub enum Dir {
     Up,
     Down,
     Left,
     Right,
 }
 
-impl Direction {
-    pub fn rot_right(&self) -> Direction {
+impl Dir {
+    pub fn rot_right(&self) -> Dir {
         match self {
-            Direction::Up => Direction::Right,
-            Direction::Right => Direction::Down,
-            Direction::Down => Direction::Left,
-            Direction::Left => Direction::Up,
+            Dir::Up => Dir::Right,
+            Dir::Right => Dir::Down,
+            Dir::Down => Dir::Left,
+            Dir::Left => Dir::Up,
         }
     }
 
-    pub fn rot_left(&self) -> Direction {
+    pub fn rot_left(&self) -> Dir {
         match self {
-            Direction::Up => Direction::Left,
-            Direction::Left => Direction::Down,
-            Direction::Down => Direction::Right,
-            Direction::Right => Direction::Up,
+            Dir::Up => Dir::Left,
+            Dir::Left => Dir::Down,
+            Dir::Down => Dir::Right,
+            Dir::Right => Dir::Up,
         }
     }
 
     #[allow(clippy::wrong_self_convention)]
     pub fn to_v2(&self) -> &V2 {
         match self {
-            Direction::Up => &V2::UP,
-            Direction::Down => &V2::DOWN,
-            Direction::Left => &V2::LEFT,
-            Direction::Right => &V2::RIGHT,
+            Dir::Up => &V2::UP,
+            Dir::Down => &V2::DOWN,
+            Dir::Left => &V2::LEFT,
+            Dir::Right => &V2::RIGHT,
         }
     }
 }

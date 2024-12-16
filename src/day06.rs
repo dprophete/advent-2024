@@ -9,7 +9,7 @@ fn p1(input: &str) -> i32 {
     let mut matrix = Matrix::from_str(input, identity);
 
     let mut pos = matrix.find_first('^').unwrap();
-    let mut dir = Direction::Up;
+    let mut dir = Dir::Up;
     let mut sum = 1;
     loop {
         let nx = pos.move_to_dir(&dir);
@@ -34,7 +34,7 @@ fn p1(input: &str) -> i32 {
 fn is_in_loop(matrix: &Matrix<char>, start: V2) -> bool {
     let mut pos = start;
     let mut times_at_pos = HashSet::new();
-    let mut dir = Direction::Up;
+    let mut dir = Dir::Up;
     loop {
         let nx = pos.move_to_dir(&dir);
         match matrix.get(&nx) {
@@ -57,7 +57,7 @@ fn p2(input: &str) -> i32 {
     let start = matrix.find_first('^').unwrap();
     let mut sum = 0;
 
-    let mut dir = Direction::Up;
+    let mut dir = Dir::Up;
     let mut pos = start;
 
     loop {
