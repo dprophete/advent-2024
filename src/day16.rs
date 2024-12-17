@@ -93,9 +93,7 @@ fn p2(input: &str) -> usize {
 
         if pos == finish {
             if score == p1_score {
-                for seat in path {
-                    all_seats.insert(seat);
-                }
+                all_seats.extend(path);
                 continue;
             }
         }
