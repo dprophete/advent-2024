@@ -6,25 +6,25 @@ use crate::utils::*;
 // p1
 //--------------------------------------------------------------------------------
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Machine {
-    a: i32,
-    b: i32,
-    c: i32,
-    prg: Vec<i32>,
+    a: u32,
+    b: u32,
+    c: u32,
+    prg: Vec<u32>,
     pc: usize,
-    out: Vec<i32>,
+    out: Vec<u32>,
 }
 
 impl Machine {
     pub fn from_str(input: &str) -> Machine {
         let mut lines = input.lines();
         let line_a = lines.next().unwrap();
-        let a = toi32(line_a.split_once(": ").unwrap().1);
+        let a = tou32(line_a.split_once(": ").unwrap().1);
         let line_b = lines.next().unwrap();
-        let b = toi32(line_b.split_once(": ").unwrap().1);
+        let b = tou32(line_b.split_once(": ").unwrap().1);
         let line_c = lines.next().unwrap();
-        let c = toi32(line_c.split_once(": ").unwrap().1);
+        let c = tou32(line_c.split_once(": ").unwrap().1);
         lines.next(); // empty line
         let line_prg = lines.next().unwrap();
         let prg = line_prg
@@ -32,7 +32,7 @@ impl Machine {
             .unwrap()
             .1
             .split(",")
-            .map(toi32)
+            .map(tou32)
             .collect();
         Machine {
             a,
@@ -44,7 +44,7 @@ impl Machine {
         }
     }
 
-    pub fn combo(&self, operand: i32) -> i32 {
+    pub fn combo(&self, operand: u32) -> u32 {
         match operand {
             4 => self.a,
             5 => self.b,
@@ -61,7 +61,7 @@ impl Machine {
         match opcode {
             0 => {
                 // adv
-                self.a = self.a / 2_i32.pow(combo_v as u32);
+                self.a = self.a / 2_u32.pow(combo_v);
                 self.pc += 2;
             }
             1 => {
@@ -71,7 +71,7 @@ impl Machine {
             }
             2 => {
                 // bst
-                self.b = combo_v % 8;
+                self.b = combo_v & 7;
                 self.pc += 2;
             }
             3 => {
@@ -89,17 +89,17 @@ impl Machine {
             }
             5 => {
                 // out
-                self.out.push(combo_v % 8);
+                self.out.push(combo_v & 7);
                 self.pc += 2;
             }
             6 => {
                 // bdv
-                self.b = self.a / 2_i32.pow(combo_v as u32);
+                self.b = self.a / 2_u32.pow(combo_v);
                 self.pc += 2;
             }
             7 => {
                 // cdv
-                self.c = self.a / 2_i32.pow(combo_v as u32);
+                self.c = self.a / 2_u32.pow(combo_v);
                 self.pc += 2;
             }
             _ => panic!("invalid opcode"),
@@ -128,6 +128,22 @@ fn p1(input: &str) -> String {
 // p2
 //--------------------------------------------------------------------------------
 
+fn p2(input: &str) -> u32 {
+    let base_machine = Machine::from_str(input);
+
+    let mut a = 0;
+    loop {
+        let mut machine = base_machine.clone();
+        machine.a = a;
+        machine.run_prg();
+        if machine.out == base_machine.prg {
+            break;
+        }
+        a += 1;
+    }
+    a
+}
+
 //--------------------------------------------------------------------------------
 // main
 //--------------------------------------------------------------------------------
@@ -136,7 +152,7 @@ pub fn run() {
     pp_day("day17: Warehouse Woes");
     time_it(p1, "p1", "data/17_sample.txt");
     time_it(p1, "p1", "data/17_input.txt");
-    // time_it(p2, "p2", "data/17_sample.txt");
+    time_it(p2, "p2", "data/17_sample2.txt");
     // time_it(p2, "p2", "data/17_input.txt");
 }
 
@@ -146,7 +162,9 @@ mod tests {
 
     #[test]
     fn test() {
-        // assert_eq!(run_it(p1, "data/17_sample.txt"), 10092);
+        assert_eq!(run_it(p1, "data/17_sample.txt"), "4,6,3,5,6,3,5,2,1,0");
+        assert_eq!(run_it(p1, "data/17_input.txt"), "4,1,5,3,1,5,3,5,7");
+        assert_eq!(run_it(p2, "data/17_sample2.txt"), 117440);
         // assert_eq!(run_it(p1, "data/17_sample_small.txt"), 2028);
         // assert_eq!(run_it(p2, "data/17_sample.txt"), 9021);
     }
