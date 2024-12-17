@@ -73,7 +73,12 @@ impl V2 {
     }
 
     pub fn move_to_dir(&self, dir: &Dir) -> V2 {
-        self.add(dir.to_v2())
+        match dir {
+            Dir::Up => self.add(&V2::UP),
+            Dir::Down => self.add(&V2::DOWN),
+            Dir::Left => self.add(&V2::LEFT),
+            Dir::Right => self.add(&V2::RIGHT),
+        }
     }
 
     pub fn neighbors(&self, pos: &V2) -> Vec<V2> {

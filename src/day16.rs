@@ -101,15 +101,15 @@ fn p2(input: &str) -> usize {
         let mut path = path.clone();
         path.push(pos);
 
-        let nx = pos.add(&dir.to_v2());
+        let nx = pos.move_to_dir(&dir);
         to_explore.push((nx, dir, score + 1, path.clone()));
 
         let left_dir = dir.rot_left();
-        let nx_left = pos.add(&left_dir.to_v2());
+        let nx_left = pos.move_to_dir(&left_dir);
         to_explore.push((nx_left, left_dir, score + 1 + 1000, path.clone()));
 
         let right_dir = dir.rot_right();
-        let nx_right = pos.add(&right_dir.to_v2());
+        let nx_right = pos.move_to_dir(&right_dir);
         to_explore.push((nx_right, right_dir, score + 1 + 1000, path));
     }
 
@@ -124,10 +124,10 @@ pub fn run() {
     pp_day("day16: Warehouse Woes");
     time_it(p1, "p1", "data/16_sample.txt");
     time_it(p1, "p1", "data/16_sample2.txt");
-    // time_it(p1, "p1", "data/16_input.txt");
+    time_it(p1, "p1", "data/16_input.txt");
     time_it(p2, "p2", "data/16_sample.txt");
     time_it(p2, "p2", "data/16_sample2.txt");
-    // time_it(p2, "p2", "data/16_input.txt");
+    time_it(p2, "p2", "data/16_input.txt");
 }
 
 #[cfg(test)]
