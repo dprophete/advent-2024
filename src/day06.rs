@@ -12,7 +12,7 @@ fn p1(input: &str) -> i32 {
     let mut dir = Dir::Up;
     let mut sum = 1;
     loop {
-        let nx = pos.move_to_dir(&dir);
+        let nx = pos.add_dir(&dir);
         match matrix.get(&nx) {
             None => break,
             Some('#') => dir = dir.rot_right(),
@@ -36,7 +36,7 @@ fn is_in_loop(matrix: &Matrix<char>, start: V2) -> bool {
     let mut times_at_pos = HashSet::new();
     let mut dir = Dir::Up;
     loop {
-        let nx = pos.move_to_dir(&dir);
+        let nx = pos.add_dir(&dir);
         match matrix.get(&nx) {
             None => return false,
             Some('#') | Some('O') => dir = dir.rot_right(),
@@ -61,7 +61,7 @@ fn p2(input: &str) -> i32 {
     let mut pos = start;
 
     loop {
-        let nx = pos.move_to_dir(&dir);
+        let nx = pos.add_dir(&dir);
         match matrix.get(&nx) {
             None => break,
             Some('#') => dir = dir.rot_right(),

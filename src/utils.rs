@@ -72,7 +72,7 @@ impl V2 {
         V2::new(self.x - other.x, self.y - other.y)
     }
 
-    pub fn move_to_dir(&self, dir: &Dir) -> V2 {
+    pub fn add_dir(&self, dir: &Dir) -> V2 {
         match dir {
             Dir::Up => self.add(&V2::UP),
             Dir::Down => self.add(&V2::DOWN),
