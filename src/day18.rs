@@ -139,7 +139,7 @@ mod tests {
     #[test]
     fn test() {
         assert_eq!(run_it(|input| p1(input, 12), "data/18_sample.txt"), 22);
-        assert_eq!(run_it(|input| p1(input, 12), "data/18_input.txt"), 280);
+        assert_eq!(run_it(|input| p1(input, 1024), "data/18_input.txt"), 280);
         assert_eq!(run_it(p2, "data/18_sample.txt"), V2::new(6, 1));
         assert_eq!(run_it(p2, "data/18_input.txt"), V2::new(28, 56));
     }
