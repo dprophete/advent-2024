@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Instant};
 
 use crate::utils::*;
 
@@ -31,41 +31,33 @@ impl Memory {
         }
     }
 
-    // pub fn fall(&mut self) {
-    //     for v in self.bytes.iter_mut() {
-    //         v.y += 1;
-    //     }
-    //     let height = self.height as i32;
-    //     self.bytes = self
-    //         .bytes
-    //         .clone()
-    //         .into_iter()
-    //         .filter(|v| v.y < height)
-    //         .collect();
-    // }
-
-    pub fn to_matrix(&self) -> Matrix<char> {
+    pub fn to_matrix(&self, take: usize) -> Matrix<char> {
         let mut matrix = Matrix::with_size(self.width, self.height, '.');
 
+        let mut i = 0;
         for v in &self.bytes {
+            i += 1;
+            if i > take {
+                break;
+            }
             matrix.set(v, '#');
         }
 
         matrix
     }
 
-    pub fn pp(&self) {
-        let matrix = self.to_matrix();
+    pub fn pp(&self, take: usize) {
+        let matrix = self.to_matrix(take);
         println!("{}", matrix);
     }
 
-    pub fn steps_to_escape(&self) -> i32 {
-        let matrix = self.to_matrix();
+    pub fn steps_to_escape(&self, take: usize) -> usize {
+        let matrix = self.to_matrix(take);
         let mut visited = HashMap::new();
         let mut to_explore = vec![(V2::new(0, 0), 0)];
         let exit = V2::new(self.width as i32 - 1, self.height as i32 - 1);
 
-        let mut max_len = i32::MAX;
+        let mut max_len = usize::MAX;
         while let Some((pos, len)) = to_explore.pop() {
             if pos == exit {
                 if len < max_len {
@@ -90,14 +82,33 @@ impl Memory {
     }
 }
 
-fn p1(input: &str, take: usize) -> i32 {
+fn p1(input: &str, take: usize) -> usize {
     let memory = Memory::from_str(input, take);
-    memory.steps_to_escape()
+    memory.steps_to_escape(usize::MAX)
 }
 
 //--------------------------------------------------------------------------------
 // p2
 //--------------------------------------------------------------------------------
+
+fn p2(input: &str) -> V2 {
+    let memory = Memory::from_str(input, usize::MAX);
+
+    let mut take = 0;
+    let start = Instant::now();
+    loop {
+        let steps = memory.steps_to_escape(take);
+        if steps == usize::MAX {
+            // we are blocked
+            break;
+        }
+        take += 1;
+        if take % 10 == 0 {
+            println!("[{}] {}", fmt_duration(start.elapsed()), take);
+        }
+    }
+    memory.bytes[take - 1]
+}
 
 //--------------------------------------------------------------------------------
 // main
@@ -107,8 +118,10 @@ pub fn run() {
     pp_day("day18: RAM Run");
     time_it(|input| p1(input, 12), "p1", "data/18_sample.txt");
     time_it(|input| p1(input, 1024), "p1", "data/18_input.txt");
+    // time_it(|input| p2(input, 20), "p2", "data/18_sample.txt");
     // time_it(p1, "p1", "data/18_input.txt");
-    // time_it(p2, "p2", "data/18_input.txt");
+    time_it(p2, "p2", "data/18_sample.txt");
+    time_it(p2, "p2", "data/18_input.txt");
 }
 
 #[cfg(test)]
@@ -119,5 +132,6 @@ mod tests {
     fn test() {
         assert_eq!(run_it(|input| p1(input, 12), "data/18_sample.txt"), 22);
         assert_eq!(run_it(|input| p1(input, 12), "data/18_input.txt"), 280);
+        assert_eq!(run_it(p2, "data/18_input.txt"), V2::new(6, 1));
     }
 }
