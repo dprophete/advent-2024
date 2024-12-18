@@ -46,13 +46,8 @@ impl Memory {
         matrix
     }
 
-    pub fn pp(&self, take: usize) {
-        let matrix = self.to_matrix(take);
-        println!("{}", matrix);
-    }
-
-    pub fn steps_to_escape(&self, take: usize) -> usize {
-        let matrix = self.to_matrix(take);
+    pub fn nb_steps_to_escape(&self) -> usize {
+        let matrix = self.to_matrix(usize::MAX);
         let mut visited = HashMap::new();
         let mut to_explore = vec![(V2::new(0, 0), 0)];
         let exit = V2::new(self.width as i32 - 1, self.height as i32 - 1);
@@ -108,7 +103,7 @@ impl Memory {
 
 fn p1(input: &str, take: usize) -> usize {
     let memory = Memory::from_str(input, take);
-    memory.steps_to_escape(usize::MAX)
+    memory.nb_steps_to_escape()
 }
 
 //--------------------------------------------------------------------------------
