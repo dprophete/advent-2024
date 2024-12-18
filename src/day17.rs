@@ -1,4 +1,4 @@
-use std::{ops::BitXor, u64, usize};
+use std::ops::BitXor;
 
 use crate::utils::*;
 
@@ -61,7 +61,7 @@ impl Machine {
         match opcode {
             0 => {
                 // adv
-                self.a = self.a >> combo_v;
+                self.a >>= combo_v;
                 self.pc += 2;
                 // println!("adv: a={}", self.a);
             }

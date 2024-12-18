@@ -43,15 +43,15 @@ fn score_per_pos(input: &str) -> (i32, HashMap<(V2, Dir), i32>) {
             continue;
         }
 
-        let nx = pos.add(&dir.to_v2());
+        let nx = pos.add(dir.to_v2());
         to_explore.push((nx, dir, score + 1));
 
         let dir_left = dir.rot_left();
-        let nx_left = pos.add(&dir_left.to_v2());
+        let nx_left = pos.add(dir_left.to_v2());
         to_explore.push((nx_left, dir_left, score + 1 + 1000));
 
         let dir_right = dir.rot_right();
-        let nx_right = pos.add(&dir_right.to_v2());
+        let nx_right = pos.add(dir_right.to_v2());
         to_explore.push((nx_right, dir_right, score + 1 + 1000));
     }
 
@@ -94,8 +94,8 @@ fn p2(input: &str) -> usize {
         if pos == finish {
             if score == p1_score {
                 all_seats.extend(path);
-                continue;
             }
+            continue;
         }
 
         let mut path = path.clone();
