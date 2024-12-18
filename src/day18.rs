@@ -1,4 +1,4 @@
-use std::{collections::HashMap, time::Instant};
+use std::collections::{HashMap, HashSet};
 
 use crate::utils::*;
 
@@ -80,6 +80,30 @@ impl Memory {
         }
         max_len
     }
+
+    pub fn has_path_to_escape(&self, take: usize) -> bool {
+        let matrix = self.to_matrix(take);
+        let mut visited = HashSet::new();
+        let mut to_explore = vec![V2::new(0, 0)];
+        let exit = V2::new(self.width as i32 - 1, self.height as i32 - 1);
+
+        while let Some(pos) = to_explore.pop() {
+            if pos == exit {
+                return true;
+            }
+            if visited.contains(&pos) {
+                continue;
+            }
+            visited.insert(pos);
+
+            for nx in pos.neighbors() {
+                if matrix.get(&nx) == Some('.') {
+                    to_explore.push(nx);
+                }
+            }
+        }
+        false
+    }
 }
 
 fn p1(input: &str, take: usize) -> usize {
@@ -95,17 +119,8 @@ fn p2(input: &str) -> V2 {
     let memory = Memory::from_str(input, usize::MAX);
 
     let mut take = 0;
-    let start = Instant::now();
-    loop {
-        let steps = memory.steps_to_escape(take);
-        if steps == usize::MAX {
-            // we are blocked
-            break;
-        }
+    while memory.has_path_to_escape(take) {
         take += 1;
-        if take % 10 == 0 {
-            println!("[{}] {}", fmt_duration(start.elapsed()), take);
-        }
     }
     memory.bytes[take - 1]
 }
@@ -118,8 +133,6 @@ pub fn run() {
     pp_day("day18: RAM Run");
     time_it(|input| p1(input, 12), "p1", "data/18_sample.txt");
     time_it(|input| p1(input, 1024), "p1", "data/18_input.txt");
-    // time_it(|input| p2(input, 20), "p2", "data/18_sample.txt");
-    // time_it(p1, "p1", "data/18_input.txt");
     time_it(p2, "p2", "data/18_sample.txt");
     time_it(p2, "p2", "data/18_input.txt");
 }
@@ -132,6 +145,7 @@ mod tests {
     fn test() {
         assert_eq!(run_it(|input| p1(input, 12), "data/18_sample.txt"), 22);
         assert_eq!(run_it(|input| p1(input, 12), "data/18_input.txt"), 280);
-        assert_eq!(run_it(p2, "data/18_input.txt"), V2::new(6, 1));
+        assert_eq!(run_it(p2, "data/18_sample.txt"), V2::new(6, 1));
+        assert_eq!(run_it(p2, "data/18_input.txt"), V2::new(28, 56));
     }
 }
