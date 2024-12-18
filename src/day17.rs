@@ -1,4 +1,4 @@
-use std::ops::BitXor;
+use std::{ops::BitXor, u64, usize};
 
 use crate::utils::*;
 
@@ -170,36 +170,33 @@ fn p1(input: &str) -> String {
 
 fn p2(input: &str) -> u64 {
     let machine = Machine::from_str(input);
+    let mut solution = u64::MAX;
+
     let len = machine.prg.len();
+    let idx = (len - 1) as i32;
+    let power = idx * 3;
 
-    let power0 = (len - 1) * 3;
+    let mut to_explore = vec![(1 << power, idx)];
 
-    // we are going to keep a list of possible starts for the current digit
-    let mut starts_to_idx = vec![1 << power0];
-
-    for idx in (0..len).rev() {
-        // 2^power is the offset of the next start where the digit idx is going to change
+    while let Some((mut start, idx)) = to_explore.pop() {
+        if idx == -1 {
+            if start < solution {
+                solution = start;
+            }
+            continue;
+        }
         let power = idx * 3;
         let offset = 1 << power;
-
-        let digit_to_match = machine.prg[idx];
-
-        let mut starts_for_next_idx = vec![];
-        while let Some(mut start) = starts_to_idx.pop() {
-            for _ in 0..8 {
-                let out = machine.run_with_a(start);
-                if out[idx] == digit_to_match {
-                    starts_for_next_idx.push(start);
-                }
-                start += offset;
+        let digit_to_match = machine.prg[idx as usize];
+        for _ in 0..8 {
+            let out = machine.run_with_a(start);
+            if out[idx as usize] == digit_to_match {
+                to_explore.push((start, idx - 1));
             }
+            start += offset;
         }
-
-        starts_to_idx = starts_for_next_idx;
     }
-
-    starts_to_idx.sort();
-    starts_to_idx[0]
+    solution
 }
 
 //--------------------------------------------------------------------------------
@@ -224,5 +221,6 @@ mod tests {
         assert_eq!(run_it(p1, "data/17_sample.txt"), "4,6,3,5,6,3,5,2,1,0");
         assert_eq!(run_it(p1, "data/17_input.txt"), "4,1,5,3,1,5,3,5,7");
         assert_eq!(run_it(p2, "data/17_sample2.txt"), 117440);
+        assert_eq!(run_it(p2, "data/17_input.txt"), 164542125272765);
     }
 }
