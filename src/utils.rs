@@ -81,10 +81,10 @@ impl V2 {
         }
     }
 
-    pub fn neighbors(&self, pos: &V2) -> Vec<V2> {
+    pub fn neighbors(&self) -> Vec<V2> {
         [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT]
             .iter()
-            .map(|dir| pos.add(dir))
+            .map(|dir| self.add(dir))
             .collect()
     }
 }
@@ -215,6 +215,11 @@ impl<T: Clone + PartialEq> Matrix<T> {
         self
     }
 
+    pub fn with_size(width: usize, height: usize, default: T) -> Matrix<T> {
+        let matrix = vec![vec![default; width]; height];
+        Matrix::from_vec(matrix)
+    }
+
     pub fn from_str(content: &str, convert: fn(char) -> T) -> Matrix<T> {
         let matrix: Vec<Vec<T>> = content
             .lines()
@@ -224,7 +229,7 @@ impl<T: Clone + PartialEq> Matrix<T> {
     }
 
     pub fn neighbors(&self, pos: &V2) -> Vec<V2> {
-        pos.neighbors(pos)
+        pos.neighbors()
             .iter()
             .filter(|nx| self.is_in(nx))
             .cloned()
