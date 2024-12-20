@@ -87,7 +87,9 @@ impl Puzzle {
         }
 
         // now solve for each potential cheat
-        let mut min_steps_for_cheats = HashMap::new();
+        // map: saving -> nb_cheats
+        let mut nb_cheats_for_saving = HashMap::new();
+
         for (cheat1, cheat2) in potential_cheats {
             let mut new_racetrack = self.racetrack.clone();
             new_racetrack.set(&cheat1, '1');
@@ -129,23 +131,36 @@ impl Puzzle {
             }
             if min_steps_with_cheat < nb_steps_initial {
                 let savings = nb_steps_initial - min_steps_with_cheat;
-                let current = min_steps_for_cheats.get(&savings).unwrap_or(&0);
-                min_steps_for_cheats.insert(savings, current + 1);
+                let current = nb_cheats_for_saving.get(&savings).unwrap_or(&0);
+                nb_cheats_for_saving.insert(savings, current + 1);
             }
         }
 
         let mut total_savings: usize = 0;
-        for &saving in min_steps_for_cheats.keys().sorted() {
+        for &saving in nb_cheats_for_saving.keys().sorted() {
             if saving < threshold {
                 continue;
             }
-            let nb_cheats = min_steps_for_cheats.get(&saving).unwrap();
+            let nb_cheats = nb_cheats_for_saving.get(&saving).unwrap();
             total_savings += nb_cheats;
-            // println!("{} cheats saved {} picoseconds", nb_cheats, saving);
+            println!("{} cheats saved {} picoseconds", nb_cheats, saving);
         }
         total_savings
     }
 }
+
+// 14 cheats saved 2 picoseconds
+// 14 cheats saved 4 picoseconds
+// 2 cheats saved 6 picoseconds
+// 4 cheats saved 8 picoseconds
+// 2 cheats saved 10 picoseconds
+// 3 cheats saved 12 picoseconds
+// 1 cheats saved 20 picoseconds
+// 1 cheats saved 36 picoseconds
+// 1 cheats saved 38 picoseconds
+// 1 cheats saved 40 picoseconds
+// 1 cheats saved 64 picoseconds
+// [5ms] p1 : data/20_sample.txt -> 44
 
 fn p1(input: &str, threshold: usize) -> usize {
     let puzzle = Puzzle::from_str(input);
@@ -166,7 +181,7 @@ fn p1(input: &str, threshold: usize) -> usize {
 pub fn run() {
     pp_day("day20: Race Condition");
     time_it(|input| p1(input, 0), "p1", "data/20_sample.txt");
-    time_it(|input| p1(input, 100), "p1", "data/20_input.txt");
+    // time_it(|input| p1(input, 100), "p1", "data/20_input.txt");
     // time_it(p2, "p2", "data/20_sample.txt");
     // time_it(p2, "p2", "data/20_input.txt");
 }
