@@ -24,15 +24,13 @@ impl Puzzle {
         Puzzle { patterns, designs }
     }
 
-    pub fn can_solve_for_design(&self, design: &Vec<char>) -> bool {
+    pub fn can_solve_for_design(&self, design: &[char]) -> bool {
         if design.is_empty() {
             return true;
         }
         for p in &self.patterns {
-            if design.starts_with(p) {
-                if self.can_solve_for_design(&design[p.len()..].to_vec()) {
-                    return true;
-                }
+            if design.starts_with(p) && self.can_solve_for_design(&design[p.len()..]) {
+                return true;
             }
         }
         false
@@ -46,9 +44,8 @@ impl Puzzle {
         if design.is_empty() {
             return 1;
         }
-        match cache.get(design) {
-            Some(&v) => return v,
-            None => (),
+        if let Some(&v) = cache.get(design) {
+            return v;
         }
         let mut sum = 0;
         for p in &self.patterns {
@@ -65,7 +62,7 @@ fn p1(input: &str) -> u32 {
     let puzzle = Puzzle::from_str(input);
     let mut sum = 0;
     for d in &puzzle.designs {
-        sum += bool_to_u32(puzzle.can_solve_for_design(&d));
+        sum += bool_to_u32(puzzle.can_solve_for_design(d));
     }
     sum
 }
@@ -79,7 +76,7 @@ fn p2(input: &str) -> u64 {
     let mut sum = 0;
     for d in &puzzle.designs {
         let mut cache: HashMap<Vec<char>, u64> = HashMap::new();
-        sum += puzzle.all_solve_for_design(&mut cache, &d);
+        sum += puzzle.all_solve_for_design(&mut cache, d);
     }
     sum
 }
