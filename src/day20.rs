@@ -28,31 +28,6 @@ impl Puzzle {
         }
     }
 
-    pub fn compute_initial_path(&self) -> HashMap<(V2, Option<(V2, V2)>), usize> {
-        let mut track = self.racetrack.clone();
-        let mut pos = self.start;
-        let mut cost = 0;
-
-        // map (pos, cheat) -> cost
-        let mut visited = HashMap::new();
-
-        while pos != self.end {
-            track.set(&pos, 'X');
-            cost += 1;
-            visited.insert((pos, None), cost);
-
-            let mut nx_pos = None;
-            for nabe in track.neighbors(&pos) {
-                if track.get(&nabe) == Some('.') || track.get(&nabe) == Some('E') {
-                    nx_pos = Some(nabe);
-                    break;
-                }
-            }
-            pos = nx_pos.unwrap();
-        }
-        visited
-    }
-
     pub fn pp_savings(&self, savings_for_cheat: &HashMap<(V2, V2), usize>) {
         let mut nb_cheats_for_saving = HashMap::new();
         for (_cheats, saving) in savings_for_cheat {
@@ -72,10 +47,9 @@ impl Puzzle {
         let mut cost = 0;
         let mut path = vec![];
 
-        // map (pos, cheat) -> cost
+        // basically a map of pos -> cost (ie index of pos on track)
         let mut cost_at_pos = HashMap::new();
 
-        // note: path will contain start but not end
         while pos != self.end {
             track.set(&pos, '-');
             cost += 1;
@@ -93,25 +67,22 @@ impl Puzzle {
         }
         cost_at_pos.insert(pos, cost);
 
-        let mut track = self.racetrack.clone();
         let mut shortcuts = HashMap::new();
+        let mut track = self.racetrack.clone();
+        track.set(&self.end, '.');
         for (mut cost, &pos) in path.iter().enumerate() {
             cost += 1;
             track.set(&pos, 'X');
             for cheat1 in track.neighbors(&pos) {
-                if cheat1 == self.end || track.get(&cheat1) != Some('#') {
+                if track.get(&cheat1) != Some('#') {
                     // cheat1 needs to be on a wall
                     continue;
                 }
                 for cheat2 in track.neighbors(&cheat1) {
-                    if cheat2 == pos
-                        || track.get(&cheat2) == Some('X')
-                        || track.get(&cheat2) == Some('#')
-                    {
+                    if cheat2 == pos || track.get(&cheat2) != Some('.') {
                         // cheat2 needs to be back on the path
                         continue;
                     }
-                    // do we have a shortcut?
                     let &cost_at_cheat2 = cost_at_pos.get(&cheat2).unwrap();
                     let saving = (cost_at_cheat2 as i32) - (cost as i32) - 2;
                     if saving > 0 && saving >= threshold {
@@ -131,72 +102,7 @@ impl Puzzle {
     }
 
     pub fn solve_p2(&self, threshold: usize) -> usize {
-        let mut visited = self.compute_initial_path();
-        let nb_steps_initial = visited.len();
-
-        // map: cheat -> saving
-        let mut savings_for_cheat = HashMap::new();
-
-        // we keep track of pos, steps, has cheated
-        let mut to_explore = vec![(self.start, 0, None)];
-        while let Some((pos, nb_steps, cheats)) = to_explore.pop() {
-            // we are already beyond the threshold ?
-            if nb_steps + threshold > nb_steps_initial {
-                continue;
-            }
-            if cheats.is_some() {
-                if let Some(&nb_steps_at_pos_no_cheat) = visited.get(&(pos, None)) {
-                    // if we have already cheated, then we need to do better than the no-cheat
-                    // version + the threshold
-                    if nb_steps + threshold > nb_steps_at_pos_no_cheat {
-                        continue;
-                    }
-                }
-            }
-
-            // we reached the end
-            if pos == self.end {
-                if let Some((cheat1, cheat2)) = cheats {
-                    let savings = nb_steps_initial - nb_steps;
-                    let &current_savings = savings_for_cheat.get(&(cheat1, cheat2)).unwrap_or(&0);
-                    if savings > current_savings {
-                        savings_for_cheat.insert((cheat1, cheat2), savings);
-                    }
-                }
-                continue;
-            }
-
-            // we hit a wall
-            if self.racetrack.get(&pos) == Some('#') {
-                if cheats.is_none() {
-                    // no cheats yet, let's start exploring the potential cheat paths here
-                    let cheat1 = pos;
-                    for cheat2 in self.racetrack.neighbors(&cheat1) {
-                        if self.racetrack.get(&cheat2) != Some('#') {
-                            // we want to make sure we don't end up in a wall here
-                            to_explore.push((cheat2, nb_steps + 1, Some((cheat1, cheat2))));
-                        }
-                    }
-                }
-                continue;
-            }
-
-            // are we beating our own score ?
-            if let Some(&nb_steps_at_pos) = visited.get(&(pos, cheats)) {
-                if nb_steps_at_pos <= nb_steps {
-                    continue;
-                }
-            }
-            visited.insert((pos, cheats), nb_steps);
-
-            for nx_pos in self.racetrack.neighbors(&pos) {
-                to_explore.push((nx_pos, nb_steps + 1, cheats));
-            }
-        }
-
-        self.pp_savings(&savings_for_cheat);
-
-        savings_for_cheat.len()
+        10
     }
 }
 
