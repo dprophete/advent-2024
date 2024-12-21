@@ -1,7 +1,5 @@
 use std::{collections::HashMap, convert::identity};
 
-use itertools::Itertools;
-
 use crate::utils::*;
 
 //--------------------------------------------------------------------------------
@@ -50,33 +48,6 @@ impl Puzzle {
         let nb_steps_initial = initial_path.len();
         println!("[DDA] day20:: nb_steps_initial: {}", nb_steps_initial);
 
-        // now go along the path and figure out where we would want to cheat
-        // let mut potential_cheats = vec![];
-        // let mut visited_steps = HashSet::new();
-        // for &step in &initial_path {
-        //     visited_steps.insert(step);
-        //     if step == self.end {
-        //         continue;
-        //     }
-        //     for cheat1 in self.racetrack.neighbors(&step) {
-        //         if self.racetrack.get(&cheat1) != Some('#') {
-        //             continue;
-        //         }
-        //         // we could cheat here
-        //         for cheat2 in self.racetrack.neighbors(&cheat1) {
-        //             if self.racetrack.get(&cheat2) != Some('#') {
-        //                 if !potential_cheats.contains(&(cheat1, cheat2)) {
-        //                     potential_cheats.push((cheat1, cheat2));
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
-        // println!(
-        //     "[DDA] day20::nb potential_cheats {:?}",
-        //     potential_cheats.len()
-        // );
-
         // let's build a map with the cost at each step
         let mut cost_at_step = HashMap::new();
         for (i, &step) in initial_path.iter().enumerate() {
@@ -91,25 +62,25 @@ impl Puzzle {
             visited.insert((pos, None), cost);
         }
 
-        println!(
-            "[DDA] day20::nb_steps_initial - threshold {:?}",
-            nb_steps_initial - threshold
-        );
         // we keep track of pos, steps, has cheated
         let mut to_explore = vec![(self.start, 0, None)];
         while let Some((pos, nb_steps, cheats)) = to_explore.pop() {
-            if nb_steps > nb_steps_initial - threshold {
-                continue;
+            match cheats {
+                Some(_) => {
+                    if nb_steps > nb_steps_initial - threshold {
+                        continue;
+                    }
+                }
+                None => {
+                    if nb_steps > nb_steps_initial {
+                        continue;
+                    }
+                }
             }
             if pos == self.end {
                 match cheats {
                     Some((cheat1, cheat2)) => {
                         let savings = nb_steps_initial - nb_steps;
-                        // println!(
-                        //     "[DDA] day20:: cheating {:?} savings: {}",
-                        //     (cheat1, cheat2),
-                        //     savings
-                        // );
                         let &current_savings =
                             savings_for_cheat.get(&(cheat1, cheat2)).unwrap_or(&0);
                         if savings > current_savings {
@@ -117,7 +88,6 @@ impl Puzzle {
                         }
                     }
                     None => {
-                        // println!("[DDA] day20:: no cheating, steps: {}", steps);
                         // great, we got the initial path...
                     }
                 }
@@ -143,19 +113,18 @@ impl Puzzle {
                 continue;
             }
 
-            if let Some(&nb_steps_at_pos_no_cheat) = visited.get(&(pos, None)) {
-                // we need to do at least better than the no-cheat version
-                match cheats {
-                    Some(_) => {
+            match cheats {
+                Some(_) => {
+                    if let Some(&nb_steps_at_pos_no_cheat) = visited.get(&(pos, None)) {
                         // if we have already cheated, then we need to do better than the no-cheat
                         // version + the threshold
                         if nb_steps_at_pos_no_cheat < nb_steps + threshold {
                             continue;
                         }
                     }
-                    None => {
-                        // we haven't cheated yet... we are matching the no-cheat version
-                    }
+                }
+                None => {
+                    // we haven't cheated yet... we are matching the no-cheat version
                 }
             }
             if let Some(&nb_steps_at_pos) = visited.get(&(pos, cheats)) {
@@ -170,81 +139,10 @@ impl Puzzle {
             }
         }
 
-        let mut total_savings: usize = 0;
-        let mut nb_cheats_for_saving = HashMap::new();
-        for (_cheats, saving) in savings_for_cheat {
-            let current = nb_cheats_for_saving.get(&saving).unwrap_or(&0);
-            nb_cheats_for_saving.insert(saving, current + 1);
-        }
-
-        for &saving in nb_cheats_for_saving.keys().sorted() {
-            if saving < threshold {
-                continue;
-            }
-            let nb_cheats = nb_cheats_for_saving.get(&saving).unwrap();
-            total_savings += nb_cheats;
-            // println!("{} cheats saved {} picoseconds", nb_cheats, saving);
-        }
-
-        // println!("[DDA] day20::savings_for_cheat {:?}", savings_for_cheat);
-        // for  in savings_for_cheat {
-        //     if saving < threshold {
-        //         continue;
-        //     }
-        //     let nb_cheats = nb_cheats_for_saving.get(&saving).unwrap();
-        //     total_savings += nb_cheats;
-        //     // println!("{} cheats saved {} picoseconds", nb_cheats, saving);
-        // }
-
-        // let mut min_steps_with_cheat = nb_steps_initial;
         // let mut nb_cheats_for_saving = HashMap::new();
-        // for (cheat1, cheat2) in potential_cheats {
-        //     let mut new_racetrack = self.racetrack.clone();
-        //     new_racetrack.set(&cheat1, '1');
-        //     new_racetrack.set(&cheat2, '2');
-        //
-        //     // println!("\n{}", new_racetrack);
-        //     // try to solve it
-        //     let mut min_steps_with_cheat = nb_steps_initial - threshold;
-        //     let mut visited = cost_at_step.clone();
-        //     // we keep track of pos, steps, has cheated
-        //     let mut to_explore = vec![(self.start, 0, false)];
-        //     while let Some((pos, steps, has_cheated)) = to_explore.pop() {
-        //         if steps >= min_steps_with_cheat {
-        //             continue;
-        //         }
-        //         if pos == self.end {
-        //             if steps < min_steps_with_cheat {
-        //                 min_steps_with_cheat = steps;
-        //             }
-        //             continue;
-        //         }
-        //         if new_racetrack.get(&pos) == Some('#') {
-        //             continue;
-        //         }
-        //         if new_racetrack.get(&pos) == Some('2') && !has_cheated {
-        //             continue;
-        //         }
-        //         if let Some(&steps_at_pos) = visited.get(&pos) {
-        //             if steps_at_pos <= steps {
-        //                 continue;
-        //             }
-        //         }
-        //         visited.insert(pos, steps);
-        //
-        //         if pos == cheat1 {
-        //             to_explore.push((cheat2, steps + 1, true));
-        //         } else {
-        //             for nx_pos in new_racetrack.neighbors(&pos) {
-        //                 to_explore.push((nx_pos, steps + 1, false));
-        //             }
-        //         }
-        //     }
-        //     if min_steps_with_cheat < nb_steps_initial {
-        //         let savings = nb_steps_initial - min_steps_with_cheat;
-        //         let current = nb_cheats_for_saving.get(&savings).unwrap_or(&0);
-        //         nb_cheats_for_saving.insert(savings, current + 1);
-        //     }
+        // for (_cheats, saving) in savings_for_cheat {
+        //     let current = nb_cheats_for_saving.get(&saving).unwrap_or(&0);
+        //     nb_cheats_for_saving.insert(saving, current + 1);
         // }
         //
         // for &saving in nb_cheats_for_saving.keys().sorted() {
@@ -252,11 +150,10 @@ impl Puzzle {
         //         continue;
         //     }
         //     let nb_cheats = nb_cheats_for_saving.get(&saving).unwrap();
-        //     total_savings += nb_cheats;
         //     // println!("{} cheats saved {} picoseconds", nb_cheats, saving);
         // }
 
-        total_savings
+        savings_for_cheat.len()
     }
 }
 
