@@ -17,8 +17,7 @@ struct Puzzle {
 
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
-        let mut racetrack = Matrix::from_str(input, identity);
-        racetrack.has_border = true;
+        let racetrack = Matrix::from_str(input, identity).clone_without_border();
         let start = racetrack.find_first('S').unwrap();
         let end = racetrack.find_first('E').unwrap();
 
@@ -67,73 +66,68 @@ impl Puzzle {
         }
     }
 
-    pub fn solve_p1(&self, threshold: usize) -> usize {
-        let mut visited = self.compute_initial_path();
-        let nb_steps_initial = visited.len();
+    pub fn solve_p1(&self, threshold: i32) -> usize {
+        let mut track = self.racetrack.clone();
+        let mut pos = self.start;
+        let mut cost = 0;
+        let mut path = vec![];
 
-        // map: cheat -> saving
-        let mut savings_for_cheat = HashMap::new();
+        // map (pos, cheat) -> cost
+        let mut cost_at_pos = HashMap::new();
 
-        // we keep track of pos, steps, has cheated
-        let mut to_explore = vec![(self.start, 0, None)];
-        while let Some((pos, nb_steps, cheats)) = to_explore.pop() {
-            // we are already beyond the threshold ?
-            if nb_steps + threshold > nb_steps_initial {
-                continue;
+        // note: path will contain start but not end
+        while pos != self.end {
+            track.set(&pos, '-');
+            cost += 1;
+            cost_at_pos.insert(pos, cost);
+            path.push(pos);
+
+            let mut nx_pos = None;
+            for nabe in track.neighbors(&pos) {
+                if track.get(&nabe) == Some('.') || track.get(&nabe) == Some('E') {
+                    nx_pos = Some(nabe);
+                    break;
+                }
             }
-            if cheats.is_some() {
-                if let Some(&nb_steps_at_pos_no_cheat) = visited.get(&(pos, None)) {
-                    // if we have already cheated, then we need to do better than the no-cheat
-                    // version + the threshold
-                    if nb_steps + threshold > nb_steps_at_pos_no_cheat {
+            pos = nx_pos.unwrap();
+        }
+        cost_at_pos.insert(pos, cost);
+
+        let mut track = self.racetrack.clone();
+        let mut shortcuts = HashMap::new();
+        for (mut cost, &pos) in path.iter().enumerate() {
+            cost += 1;
+            track.set(&pos, 'X');
+            for cheat1 in track.neighbors(&pos) {
+                if cheat1 == self.end || track.get(&cheat1) != Some('#') {
+                    // cheat1 needs to be on a wall
+                    continue;
+                }
+                for cheat2 in track.neighbors(&cheat1) {
+                    if cheat2 == pos
+                        || track.get(&cheat2) == Some('X')
+                        || track.get(&cheat2) == Some('#')
+                    {
+                        // cheat2 needs to be back on the path
                         continue;
                     }
-                }
-            }
-
-            // we reached the end
-            if pos == self.end {
-                if let Some((cheat1, cheat2)) = cheats {
-                    let savings = nb_steps_initial - nb_steps;
-                    let &current_savings = savings_for_cheat.get(&(cheat1, cheat2)).unwrap_or(&0);
-                    if savings > current_savings {
-                        savings_for_cheat.insert((cheat1, cheat2), savings);
-                    }
-                }
-                continue;
-            }
-
-            // we hit a wall
-            if self.racetrack.get(&pos) == Some('#') {
-                if cheats.is_none() {
-                    // no cheats yet, let's start exploring the potential cheat paths here
-                    let cheat1 = pos;
-                    for cheat2 in self.racetrack.neighbors(&cheat1) {
-                        if self.racetrack.get(&cheat2) != Some('#') {
-                            // we want to make sure we don't end up in a wall here
-                            to_explore.push((cheat2, nb_steps + 1, Some((cheat1, cheat2))));
+                    // do we have a shortcut?
+                    let &cost_at_cheat2 = cost_at_pos.get(&cheat2).unwrap();
+                    let saving = (cost_at_cheat2 as i32) - (cost as i32) - 2;
+                    if saving > 0 && saving >= threshold {
+                        // we have a shortcut !!!
+                        let saving = saving as usize;
+                        let &current = shortcuts.get(&(cheat1, cheat2)).unwrap_or(&0);
+                        if saving > current {
+                            shortcuts.insert((cheat1, cheat2), saving);
                         }
                     }
                 }
-                continue;
-            }
-
-            // are we beating our own score ?
-            if let Some(&nb_steps_at_pos) = visited.get(&(pos, cheats)) {
-                if nb_steps_at_pos <= nb_steps {
-                    continue;
-                }
-            }
-            visited.insert((pos, cheats), nb_steps);
-
-            for nx_pos in self.racetrack.neighbors(&pos) {
-                to_explore.push((nx_pos, nb_steps + 1, cheats));
             }
         }
 
-        // self.pp_savings(&savings_for_cheat);
-
-        savings_for_cheat.len()
+        // self.pp_savings(&shortcuts);
+        shortcuts.len()
     }
 
     pub fn solve_p2(&self, threshold: usize) -> usize {
@@ -206,7 +200,7 @@ impl Puzzle {
     }
 }
 
-fn p1(input: &str, threshold: usize) -> usize {
+fn p1(input: &str, threshold: i32) -> usize {
     let puzzle = Puzzle::from_str(input);
     puzzle.solve_p1(threshold)
 }
@@ -227,8 +221,8 @@ fn p2(input: &str, threshold: usize) -> usize {
 pub fn run() {
     pp_day("day20: Race Condition");
     time_it(|input| p1(input, 0), "p1", "data/20_sample.txt");
-    // time_it(|input| p1(input, 100), "p1", "data/20_input.txt");
-    time_it(|input| p2(input, 50), "p2", "data/20_sample.txt");
+    time_it(|input| p1(input, 100), "p1", "data/20_input.txt");
+    // time_it(|input| p2(input, 50), "p2", "data/20_sample.txt");
     // time_it(p2, "p2", "data/20_input.txt");
 }
 
