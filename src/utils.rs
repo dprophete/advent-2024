@@ -158,7 +158,6 @@ pub struct Matrix<T> {
     pub matrix: Vec<Vec<T>>,
     pub width: i32,
     pub height: i32,
-    pub has_border: bool,
 }
 
 // base matrix
@@ -170,8 +169,19 @@ impl<T: Clone + PartialEq> Matrix<T> {
             matrix,
             width,
             height,
-            has_border: false,
         }
+    }
+
+    pub fn clone_without_border(&self) -> Matrix<T> {
+        let mut new_matrix = vec![];
+        for y in 1..self.height - 1 {
+            let mut row = vec![];
+            for x in 1..self.width - 1 {
+                row.push(self.matrix[y as usize][x as usize].clone());
+            }
+            new_matrix.push(row);
+        }
+        Matrix::from_vec(new_matrix)
     }
 
     pub fn find_first(&self, value: T) -> Option<V2> {
@@ -198,11 +208,7 @@ impl<T: Clone + PartialEq> Matrix<T> {
     }
 
     pub fn is_in(&self, pos: &V2) -> bool {
-        if self.has_border {
-            pos.x > 0 && pos.y > 0 && pos.x < self.width - 1 && pos.y < self.height - 1
-        } else {
-            pos.x >= 0 && pos.y >= 0 && pos.x < self.width && pos.y < self.height
-        }
+        pos.x >= 0 && pos.y >= 0 && pos.x < self.width && pos.y < self.height
     }
 
     // return char at x, y or '.' if out of bounds
