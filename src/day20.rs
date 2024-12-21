@@ -65,10 +65,18 @@ impl Puzzle {
         // we keep track of pos, steps, has cheated
         let mut to_explore = vec![(self.start, 0, None)];
         while let Some((pos, nb_steps, cheats)) = to_explore.pop() {
+            // we are already beyond the threshold ?
             match cheats {
                 Some(_) => {
-                    if nb_steps > nb_steps_initial - threshold {
+                    if nb_steps_initial < nb_steps + threshold {
                         continue;
+                    }
+                    if let Some(&nb_steps_at_pos_no_cheat) = visited.get(&(pos, None)) {
+                        // if we have already cheated, then we need to do better than the no-cheat
+                        // version + the threshold
+                        if nb_steps_at_pos_no_cheat < nb_steps + threshold {
+                            continue;
+                        }
                     }
                 }
                 None => {
@@ -77,6 +85,8 @@ impl Puzzle {
                     }
                 }
             }
+
+            // we reached the end
             if pos == self.end {
                 match cheats {
                     Some((cheat1, cheat2)) => {
@@ -93,6 +103,8 @@ impl Puzzle {
                 }
                 continue;
             }
+
+            // we hit a wall
             if self.racetrack.get(&pos) == Some('#') {
                 match cheats {
                     Some((_cheat1, _cheat2)) => {
@@ -109,24 +121,10 @@ impl Puzzle {
                         }
                     }
                 }
-                // do we need to go through the rest of this ?
                 continue;
             }
 
-            match cheats {
-                Some(_) => {
-                    if let Some(&nb_steps_at_pos_no_cheat) = visited.get(&(pos, None)) {
-                        // if we have already cheated, then we need to do better than the no-cheat
-                        // version + the threshold
-                        if nb_steps_at_pos_no_cheat < nb_steps + threshold {
-                            continue;
-                        }
-                    }
-                }
-                None => {
-                    // we haven't cheated yet... we are matching the no-cheat version
-                }
-            }
+            // are we beating our own score ?
             if let Some(&nb_steps_at_pos) = visited.get(&(pos, cheats)) {
                 if nb_steps_at_pos <= nb_steps {
                     continue;
