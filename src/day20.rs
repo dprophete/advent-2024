@@ -65,7 +65,7 @@ impl Puzzle {
             }
             pos = nx_pos.unwrap();
         }
-        cost_at_pos.insert(pos, cost);
+        cost_at_pos.insert(pos, cost + 1);
 
         let mut shortcuts = HashMap::new();
         let mut track = self.racetrack.clone();
@@ -101,8 +101,64 @@ impl Puzzle {
         shortcuts.len()
     }
 
-    pub fn solve_p2(&self, threshold: usize) -> usize {
-        10
+    pub fn solve_p2(&self, threshold: i32) -> usize {
+        let mut track = self.racetrack.clone();
+        let mut pos = self.start;
+        let mut cost = 0;
+        let mut path = vec![];
+
+        // basically a map of pos -> cost (ie index of pos on track)
+        let mut cost_at_pos = HashMap::new();
+
+        while pos != self.end {
+            track.set(&pos, '-');
+            cost += 1;
+            cost_at_pos.insert(pos, cost);
+            path.push(pos);
+
+            let mut nx_pos = None;
+            for nabe in track.neighbors(&pos) {
+                if track.get(&nabe) == Some('.') || track.get(&nabe) == Some('E') {
+                    nx_pos = Some(nabe);
+                    break;
+                }
+            }
+            pos = nx_pos.unwrap();
+        }
+        cost_at_pos.insert(pos, cost);
+
+        let mut shortcuts = HashMap::new();
+        let mut track = self.racetrack.clone();
+        track.set(&self.end, '.');
+        for (mut cost, &pos) in path.iter().enumerate() {
+            cost += 1;
+            track.set(&pos, 'X');
+            for cheat1 in track.neighbors(&pos) {
+                if track.get(&cheat1) != Some('#') {
+                    // cheat1 needs to be on a wall
+                    continue;
+                }
+                for cheat2 in track.neighbors(&cheat1) {
+                    if cheat2 == pos || track.get(&cheat2) != Some('.') {
+                        // cheat2 needs to be back on the path
+                        continue;
+                    }
+                    let &cost_at_cheat2 = cost_at_pos.get(&cheat2).unwrap();
+                    let saving = (cost_at_cheat2 as i32) - (cost as i32) - 2;
+                    if saving > 0 && saving >= threshold {
+                        // we have a shortcut !!!
+                        let saving = saving as usize;
+                        let &current = shortcuts.get(&(cheat1, cheat2)).unwrap_or(&0);
+                        if saving > current {
+                            shortcuts.insert((cheat1, cheat2), saving);
+                        }
+                    }
+                }
+            }
+        }
+
+        // self.pp_savings(&shortcuts);
+        shortcuts.len()
     }
 }
 
@@ -115,7 +171,7 @@ fn p1(input: &str, threshold: i32) -> usize {
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2(input: &str, threshold: usize) -> usize {
+fn p2(input: &str, threshold: i32) -> usize {
     let puzzle = Puzzle::from_str(input);
     puzzle.solve_p2(threshold)
 }
@@ -127,7 +183,7 @@ fn p2(input: &str, threshold: usize) -> usize {
 pub fn run() {
     pp_day("day20: Race Condition");
     time_it(|input| p1(input, 0), "p1", "data/20_sample.txt");
-    time_it(|input| p1(input, 100), "p1", "data/20_input.txt");
+    // time_it(|input| p1(input, 100), "p1", "data/20_input.txt");
     // time_it(|input| p2(input, 50), "p2", "data/20_sample.txt");
     // time_it(p2, "p2", "data/20_input.txt");
 }
