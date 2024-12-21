@@ -31,10 +31,15 @@ impl Puzzle {
         // first, find the path
         let mut track = self.racetrack.clone();
         let mut pos = self.start;
-        let mut initial_path = vec![];
+        let mut cost = 0;
+
+        // map (pos, cheat) -> cost
+        let mut visited = HashMap::new();
+
         while pos != self.end {
             track.set(&pos, 'X');
-            initial_path.push(pos);
+            cost += 1;
+            visited.insert((pos, None), cost);
 
             let mut nx_pos = None;
             for nabe in track.neighbors(&pos) {
@@ -45,22 +50,11 @@ impl Puzzle {
             }
             pos = nx_pos.unwrap();
         }
-        let nb_steps_initial = initial_path.len();
-        println!("[DDA] day20:: nb_steps_initial: {}", nb_steps_initial);
-
-        // let's build a map with the cost at each step
-        let mut cost_at_step = HashMap::new();
-        for (i, &step) in initial_path.iter().enumerate() {
-            cost_at_step.insert(step, i + 1);
-        }
+        let nb_steps_initial = cost;
+        println!("[DDA] day20:: nb_steps_initial: {}", cost);
 
         // map: cheat -> saving
         let mut savings_for_cheat = HashMap::new();
-
-        let mut visited = HashMap::new();
-        for (pos, cost) in cost_at_step {
-            visited.insert((pos, None), cost);
-        }
 
         // we keep track of pos, steps, has cheated
         let mut to_explore = vec![(self.start, 0, None)];
