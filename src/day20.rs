@@ -88,17 +88,11 @@ impl Puzzle {
 
             // we reached the end
             if pos == self.end {
-                match cheats {
-                    Some((cheat1, cheat2)) => {
-                        let savings = nb_steps_initial - nb_steps;
-                        let &current_savings =
-                            savings_for_cheat.get(&(cheat1, cheat2)).unwrap_or(&0);
-                        if savings > current_savings {
-                            savings_for_cheat.insert((cheat1, cheat2), savings);
-                        }
-                    }
-                    None => {
-                        // great, we got the initial path...
+                if let Some((cheat1, cheat2)) = cheats {
+                    let savings = nb_steps_initial - nb_steps;
+                    let &current_savings = savings_for_cheat.get(&(cheat1, cheat2)).unwrap_or(&0);
+                    if savings > current_savings {
+                        savings_for_cheat.insert((cheat1, cheat2), savings);
                     }
                 }
                 continue;
@@ -106,18 +100,13 @@ impl Puzzle {
 
             // we hit a wall
             if self.racetrack.get(&pos) == Some('#') {
-                match cheats {
-                    Some((_cheat1, _cheat2)) => {
-                        // too bad... we already cheated and hit another wall here...
-                    }
-                    None => {
-                        // no cheats yet, let's start exploring the potential cheat paths here
-                        let cheat1 = pos;
-                        for cheat2 in self.racetrack.neighbors(&cheat1) {
-                            if self.racetrack.get(&cheat2) != Some('#') {
-                                // we want to make sure we don't end up in a wall here
-                                to_explore.push((cheat2, nb_steps + 1, Some((cheat1, cheat2))));
-                            }
+                if cheats.is_none() {
+                    // no cheats yet, let's start exploring the potential cheat paths here
+                    let cheat1 = pos;
+                    for cheat2 in self.racetrack.neighbors(&cheat1) {
+                        if self.racetrack.get(&cheat2) != Some('#') {
+                            // we want to make sure we don't end up in a wall here
+                            to_explore.push((cheat2, nb_steps + 1, Some((cheat1, cheat2))));
                         }
                     }
                 }
