@@ -204,7 +204,7 @@ fn p2(input: &str) -> u64 {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    pp_day("day17: Warehouse Woes");
+    pp_day("day17: Chronospatial Computer");
     time_it(p1, "p1", "data/17_sample.txt");
     time_it(p1, "p1", "data/17_sample2.txt");
     time_it(p1, "p1", "data/17_input.txt");

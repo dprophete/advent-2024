@@ -121,7 +121,7 @@ fn p2(input: &str) -> usize {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    pp_day("day16: Warehouse Woes");
+    pp_day("day16: Reindeer Maze");
     time_it(p1, "p1", "data/16_sample.txt");
     time_it(p1, "p1", "data/16_sample2.txt");
     time_it(p1, "p1", "data/16_input.txt");
