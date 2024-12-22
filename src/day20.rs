@@ -207,6 +207,6 @@ mod tests {
         assert_eq!(run_it(|input| p1(input, 0), "data/20_sample.txt"), 44);
         assert_eq!(run_it(|input| p1(input, 100), "data/20_input.txt"), 1429);
         assert_eq!(run_it(|input| p2(input, 50), "data/20_sample.txt"), 285);
-        assert_eq!(run_it(|input| p2(input, 50), "data/20_input.txt"), 988931);
+        assert_eq!(run_it(|input| p2(input, 100), "data/20_input.txt"), 988931);
     }
 }

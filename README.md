@@ -1,6 +1,6 @@
 <!-- AOC TILES BEGIN -->
 <h1 align="center">
-  2024 - 40 ⭐ - Rust
+  2024 - 41 ⭐ - Rust
 </h1>
 <a href="src/day01.rs">
   <img src=".aoc_tiles/tiles/2024/01.png" width="161px">
@@ -61,6 +61,9 @@
 </a>
 <a href="src/day20.rs">
   <img src=".aoc_tiles/tiles/2024/20.png" width="161px">
+</a>
+<a href="src/day21.rs">
+  <img src=".aoc_tiles/tiles/2024/21.png" width="161px">
 </a>
 <!-- AOC TILES END -->
 
