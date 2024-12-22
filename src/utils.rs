@@ -28,6 +28,10 @@ pub fn tou32(s: &str) -> u32 {
     s.parse::<u32>().unwrap()
 }
 
+pub fn tousize(s: &str) -> usize {
+    s.parse::<usize>().unwrap()
+}
+
 pub fn c_tou32(c: char) -> u32 {
     c.to_digit(10).unwrap()
 }
