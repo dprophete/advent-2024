@@ -221,7 +221,7 @@ impl Puzzle {
                 paths = only_keep_good_paths(&paths);
 
                 println!(
-                    "[DDA] day21:: nb-paths after {} keypads {} (len = {})",
+                    "keypad {}: nb-paths {} (len = {})",
                     i + 1,
                     paths.len(),
                     paths[0].len()
