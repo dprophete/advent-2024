@@ -1,4 +1,11 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::utils::*;
+
+// a sequence of 4 consecutive changes
+type Seq = (i8, i8, i8, i8);
+
+const SEQ_NOOP: i8 = -100;
 
 //--------------------------------------------------------------------------------
 // p1
@@ -29,14 +36,10 @@ fn compute_nx(secret_number: i64) -> i64 {
     secret_number % 16777216
 }
 
-fn find_sequence(a: i8, b: i8, c: i8, d: i8, changes: &Vec<i8>) -> Option<usize> {
-    for i in 0..changes.len() - 4 {
-        if changes[i] == a && changes[i + 1] == b && changes[i + 2] == c && changes[i + 3] == d {
-            return Some(i);
-        }
-    }
-    None
-}
+// fn find_sequence(&(a, b, c, d): &Seq, changes: &[i8]) -> Option<usize> {
+//     (0..changes.len() - 4)
+//         .find(|&i| changes[i] == a && changes[i + 1] == b && changes[i + 2] == c && changes[i + 3] == d)
+// }
 
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
@@ -61,35 +64,67 @@ impl Puzzle {
         // let mut sum = 0;
         let mut changes_for_all_sellers = vec![];
         let mut ones_for_all_sellers = vec![];
+        let mut seqs_for_all_sellers = vec![];
+        let mut distinct_seqs = HashSet::new();
+
+        // let test_seq: Seq = (-2, 1, -1, 3);
         for &secret_number in &self.secret_numbers {
             let mut new_secret_number = secret_number;
             let mut ones_for_seller: Vec<i8> = vec![];
             let mut changes_for_seller: Vec<i8> = vec![];
+            let mut seqs_for_seller = HashMap::new();
+
             let mut current_ones = (new_secret_number % 10) as i8;
+
+            let mut seq: Seq = (SEQ_NOOP, SEQ_NOOP, SEQ_NOOP, SEQ_NOOP);
+
+            // we are going to generate 2000 changes
             for i in 0..2000 {
                 new_secret_number = compute_nx(new_secret_number);
+
                 let new_current_one = (new_secret_number % 10) as i8;
                 ones_for_seller.push(new_current_one);
-                changes_for_seller.push(new_current_one - current_ones);
-                current_ones = new_current_one
-            }
-            match find_sequence(-2, 1, -1, 3, &changes_for_seller) {
-                Some(i) => {
-                    println!(
-                        "[DDA] day22:: for {}, found at idx {} , value: {}",
-                        secret_number,
-                        i,
-                        &ones_for_seller[i + 3]
-                    );
+
+                let new_change = new_current_one - current_ones;
+                changes_for_seller.push(new_change);
+
+                current_ones = new_current_one;
+
+                seq = (seq.1, seq.2, seq.3, new_change);
+                if i >= 3 {
+                    if let Some(&val_at_seq) = seqs_for_seller.get(&seq) {
+                        if val_at_seq < new_current_one {
+                            seqs_for_seller.insert(seq, new_current_one);
+                        }
+                    } else {
+                        distinct_seqs.insert(seq);
+                        seqs_for_seller.insert(seq, new_current_one);
+                    }
                 }
-                None => {
-                    println!("[DDA] day22:: no sequence found for {}", secret_number);
-                }
             }
+
             changes_for_all_sellers.push(changes_for_seller);
             ones_for_all_sellers.push(ones_for_seller);
+            seqs_for_all_sellers.push(seqs_for_seller);
         }
-        10
+
+        println!("[DDA] day22::distinct_seqs {}", distinct_seqs.len());
+        println!("[DDA] day22::nb_sellers {}", &self.secret_numbers.len());
+
+        let mut max_nb_bananas = 0;
+        for seq_to_test in distinct_seqs {
+            let mut nb_bananas_for_seq = 0;
+            for seqs_for_seller in &seqs_for_all_sellers {
+                if let Some(&bananas) = seqs_for_seller.get(&seq_to_test) {
+                    nb_bananas_for_seq += bananas;
+                }
+            }
+            if nb_bananas_for_seq > max_nb_bananas {
+                max_nb_bananas = nb_bananas_for_seq;
+            }
+        }
+
+        max_nb_bananas as usize
     }
 }
 
@@ -116,7 +151,7 @@ pub fn run() {
     // time_it(p1, "p1", "data/22_sample.txt");
     // time_it(p1, "p1", "data/22_input.txt");
     time_it(p2, "p2", "data/22_sample2.txt");
-    // time_it(p2, "p2", "data/22_input.txt");
+    time_it(p2, "p2", "data/22_input.txt");
 }
 
 #[cfg(test)]
