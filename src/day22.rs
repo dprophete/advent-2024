@@ -61,17 +61,11 @@ impl Puzzle {
     }
 
     pub fn p2(&self) -> usize {
-        // let mut sum = 0;
-        let mut changes_for_all_sellers = vec![];
-        let mut ones_for_all_sellers = vec![];
         let mut seqs_for_all_sellers = vec![];
         let mut distinct_seqs = HashSet::new();
 
-        // let test_seq: Seq = (-2, 1, -1, 3);
         for &secret_number in &self.secret_numbers {
             let mut new_secret_number = secret_number;
-            let mut ones_for_seller: Vec<i8> = vec![];
-            let mut changes_for_seller: Vec<i8> = vec![];
             let mut seqs_for_seller = HashMap::new();
 
             let mut current_ones = (new_secret_number % 10) as i8;
@@ -83,33 +77,18 @@ impl Puzzle {
                 new_secret_number = compute_nx(new_secret_number);
 
                 let new_current_one = (new_secret_number % 10) as i8;
-                ones_for_seller.push(new_current_one);
-
                 let new_change = new_current_one - current_ones;
-                changes_for_seller.push(new_change);
-
                 current_ones = new_current_one;
 
                 seq = (seq.1, seq.2, seq.3, new_change);
-                if i >= 3 {
-                    if let Some(&val_at_seq) = seqs_for_seller.get(&seq) {
-                        if val_at_seq < new_current_one {
-                            seqs_for_seller.insert(seq, new_current_one);
-                        }
-                    } else {
-                        distinct_seqs.insert(seq);
-                        seqs_for_seller.insert(seq, new_current_one);
-                    }
+                if i >= 3 && !seqs_for_seller.contains_key(&seq) {
+                    distinct_seqs.insert(seq);
+                    seqs_for_seller.insert(seq, new_current_one);
                 }
             }
 
-            changes_for_all_sellers.push(changes_for_seller);
-            ones_for_all_sellers.push(ones_for_seller);
             seqs_for_all_sellers.push(seqs_for_seller);
         }
-
-        println!("[DDA] day22::distinct_seqs {}", distinct_seqs.len());
-        println!("[DDA] day22::nb_sellers {}", &self.secret_numbers.len());
 
         let mut max_nb_bananas = 0;
         for seq_to_test in distinct_seqs {
@@ -148,8 +127,8 @@ fn p2(input: &str) -> usize {
 
 pub fn run() {
     pp_day("day22: Keypad Conundrum");
-    // time_it(p1, "p1", "data/22_sample.txt");
-    // time_it(p1, "p1", "data/22_input.txt");
+    time_it(p1, "p1", "data/22_sample.txt");
+    time_it(p1, "p1", "data/22_input.txt");
     time_it(p2, "p2", "data/22_sample2.txt");
     time_it(p2, "p2", "data/22_input.txt");
 }
@@ -163,6 +142,6 @@ mod tests {
         assert_eq!(run_it(p1, "data/22_sample.txt"), 37327623);
         assert_eq!(run_it(p1, "data/22_input.txt"), 13584398738);
         assert_eq!(run_it(p2, "data/22_sample2.txt"), 23);
-        // assert_eq!(run_it(p2, "data/22_input.txt"), 230049027535970);
+        assert_eq!(run_it(p2, "data/22_input.txt"), 1612);
     }
 }
