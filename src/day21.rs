@@ -26,13 +26,12 @@ static NUM_SP: Lazy<HashMap<(char, char), PathC>> = Lazy::new(|| compute_matrix_
 static DIR_SP: Lazy<HashMap<(char, char), PathC>> = Lazy::new(|| compute_matrix_shortest_paths(&DIR_KP));
 
 //--------------------------------------------------------------------------------
-// p1
+// preparing shortest paths for dir and num keypads
+// we want to compute the shortest paths between all pairs of keys
+//
+// note: this is way way too complicated for what it does
+// I might as well have hardcoded the paths
 //--------------------------------------------------------------------------------
-
-#[derive(Debug, Clone)]
-struct Puzzle {
-    codes: Vec<Vec<char>>,
-}
 
 impl Dir {
     fn to_dir_keypad(self) -> char {
@@ -45,19 +44,10 @@ impl Dir {
     }
 }
 
-fn pp_path(path: &PathC) {
-    for i in path {
-        print!("{}", i);
-    }
-    println!();
-}
-
 fn path_dir_to_path_char(path: &PathD) -> PathC {
     path.iter().map(|d| d.to_dir_keypad()).collect()
 }
 
-// note: this is way too complicated...
-// I might as well have hardcoded the paths
 fn compute_matrix_shortest_paths(matrix: &Matrix<char>) -> HashMap<(char, char), PathC> {
     let mut cost_at_pos = HashMap::new();
     for x0 in 0..matrix.width {
@@ -122,18 +112,6 @@ fn compute_matrix_shortest_paths(matrix: &Matrix<char>) -> HashMap<(char, char),
     cost_at_pos2
 }
 
-pub fn get_path_for_nums(code: &Vec<char>) -> PathC {
-    let mut pos_arm = 'A';
-    let mut new_paths = vec![];
-    for &c in code {
-        // need to go from pos_arm to c
-        let path_to_c = NUM_SP.get(&(pos_arm, c)).unwrap();
-        new_paths.push(path_to_c.clone());
-        pos_arm = c;
-    }
-    new_paths.concat()
-}
-
 // let's iterate over the paths and count how many times we change letter
 pub fn score_change_dir(path: &PathC) -> usize {
     let mut score = 0;
@@ -172,6 +150,34 @@ pub fn keep_one(paths: &[PathC]) -> PathC {
     paths.sort_by_key(|&p| score_dist_to_a(p));
     let &lst = paths.last().unwrap();
     lst.to_vec()
+}
+
+//--------------------------------------------------------------------------------
+// p1
+//--------------------------------------------------------------------------------
+
+#[derive(Debug, Clone)]
+struct Puzzle {
+    codes: Vec<Vec<char>>,
+}
+
+fn pp_path(path: &PathC) {
+    for i in path {
+        print!("{}", i);
+    }
+    println!();
+}
+
+pub fn get_path_for_nums(code: &Vec<char>) -> PathC {
+    let mut pos_arm = 'A';
+    let mut new_paths = vec![];
+    for &c in code {
+        // need to go from pos_arm to c
+        let path_to_c = NUM_SP.get(&(pos_arm, c)).unwrap();
+        new_paths.push(path_to_c.clone());
+        pos_arm = c;
+    }
+    new_paths.concat()
 }
 
 pub fn shortest_len(pos_arm: char, c: char, level: usize, cache: &mut HashMap<(char, char, usize), usize>) -> usize {
