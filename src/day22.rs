@@ -5,7 +5,7 @@ use crate::utils::*;
 // a sequence of 4 consecutive changes
 type Seq = (i8, i8, i8, i8);
 
-const SEQ_NOOP: i8 = -100;
+const SEQ_NOOP: i8 = -100; // anything outside of [-9, 9] is good...
 
 //--------------------------------------------------------------------------------
 // p1
@@ -35,11 +35,6 @@ fn compute_nx(secret_number: i64) -> i64 {
     // prune secret_number
     secret_number % 16777216
 }
-
-// fn find_sequence(&(a, b, c, d): &Seq, changes: &[i8]) -> Option<usize> {
-//     (0..changes.len() - 4)
-//         .find(|&i| changes[i] == a && changes[i + 1] == b && changes[i + 2] == c && changes[i + 3] == d)
-// }
 
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
