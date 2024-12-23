@@ -116,7 +116,7 @@ impl Puzzle {
             let mut nb_bananas_for_seq = 0;
             for seqs_for_seller in &seqs_for_all_sellers {
                 if let Some(&bananas) = seqs_for_seller.get(&seq_to_test) {
-                    nb_bananas_for_seq += bananas;
+                    nb_bananas_for_seq += bananas as usize;
                 }
             }
             if nb_bananas_for_seq > max_nb_bananas {
@@ -124,7 +124,7 @@ impl Puzzle {
             }
         }
 
-        max_nb_bananas as usize
+        max_nb_bananas
     }
 }
 
