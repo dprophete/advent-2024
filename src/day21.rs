@@ -48,15 +48,8 @@ impl Dir {
     }
 }
 
-fn pp_paths(paths: &Vec<PathC>) {
-    for p in paths {
-        pp_instr(p);
-    }
-    println!();
-}
-
-fn pp_instr(instr: &PathC) {
-    for i in instr {
+fn pp_path(path: &PathC) {
+    for i in path {
         print!("{}", i);
     }
     println!();
@@ -67,10 +60,6 @@ fn path_dir_to_path_char(path: &PathD) -> PathC {
 }
 
 fn compute_matrix_shortest_paths(matrix: &Matrix<char>) -> HashMap<(char, char), PathC> {
-    // println!(
-    //     "[DDA] day21:: computing shortest paths for matrix:\n{}",
-    //     matrix
-    // );
     let mut cost_at_pos = HashMap::new();
     for x0 in 0..matrix.width {
         for y0 in 0..matrix.height {
@@ -146,17 +135,6 @@ pub fn get_path_for_nums(code: &Vec<char>) -> PathC {
     new_paths.concat()
 }
 
-pub fn get_path_for_keys(keys: &PathC) -> PathC {
-    let mut pos_arm = 'A';
-    let mut new_paths = vec![];
-    for &k in keys {
-        let path_to_k = DIR_SP.get(&(pos_arm, k)).unwrap();
-        new_paths.push(path_to_k.clone());
-        pos_arm = k;
-    }
-    new_paths.concat()
-}
-
 // let's iterate over the paths and count how many times we change letter
 pub fn score_change_dir(path: &PathC) -> usize {
     let mut score = 0;
@@ -203,23 +181,47 @@ impl Puzzle {
         Puzzle { codes }
     }
 
-    pub fn solve_p1(&self, nb_robots: usize) -> usize {
-        let mut sum = 0;
-        for code in &self.codes {
-            println!("[DDA] day21:: trying to type code: {:?}", code);
-            let mut path = get_path_for_nums(code);
+    pub fn shortest_len(
+        &self,
+        pos_arm: char,
+        c: char,
+        level: usize,
+        cache: &mut HashMap<(char, char, usize), usize>,
+    ) -> usize {
+        if level == 1 {
+            return DIR_SP.get(&(pos_arm, c)).unwrap().len();
+        }
+        if let Some(&len) = cache.get(&(pos_arm, c, level)) {
+            return len;
+        }
 
-            // paths = vec!["<v".chars().collect::<Vec<char>>()];
-            for i in 0..nb_robots {
-                path = get_path_for_keys(&path);
-                println!("keypad {}: {}", i + 1, path.len());
-            }
+        let mut len = 0;
+        let path_to_c = DIR_SP.get(&(pos_arm, c)).unwrap();
+        let mut local_pos_arm = 'A';
+        for &tgt in path_to_c {
+            len += self.shortest_len(local_pos_arm, tgt, level - 1, cache);
+            local_pos_arm = tgt;
+        }
+        cache.insert((pos_arm, c, level), len);
+        len
+    }
+
+    pub fn solve(&self, nb_robots: usize) -> usize {
+        let mut sum = 0;
+        let mut cache: HashMap<(char, char, usize), usize> = HashMap::new();
+        for code in &self.codes {
+            // println!("[DDA] day21:: trying to type code: {:?}", code);
+
             let code_string: String = code.iter().collect();
             let code_str = &code_string[..3];
             let code_i32 = tousize(code_str);
-            // println!("[DDA] day21:: {} x {}", code_i32, paths[0].len());
-            sum += path.len() * code_i32;
-            // break;
+
+            let path = get_path_for_nums(&code);
+            let mut pos_arm = 'A';
+            for c in path {
+                sum += code_i32 * self.shortest_len(pos_arm, c, nb_robots, &mut cache);
+                pos_arm = c;
+            }
         }
         sum
     }
@@ -227,20 +229,17 @@ impl Puzzle {
 
 fn p1(input: &str) -> usize {
     let puzzle = Puzzle::from_str(input);
-    puzzle.solve_p1(2)
-}
-
-fn p2(input: &str) -> usize {
-    let puzzle = Puzzle::from_str(input);
-    puzzle.solve_p1(18)
+    puzzle.solve(2)
 }
 
 //--------------------------------------------------------------------------------
 // p2
 //--------------------------------------------------------------------------------
 
-// fn p2(input: &str, threshold: i32) -> usize {
-// }
+fn p2(input: &str) -> usize {
+    let puzzle = Puzzle::from_str(input);
+    puzzle.solve(25)
+}
 
 //--------------------------------------------------------------------------------
 // main
@@ -248,11 +247,9 @@ fn p2(input: &str) -> usize {
 
 pub fn run() {
     pp_day("day21: Keypad Conundrum");
-    // time_it(p1, "p1", "data/21_sample.txt");
-    // time_it(p1, "p1", "data/21_input.txt");
-    // time_it(p2, "p2", "data/21_sample.txt");
-    //10, no break: 266085760
-    //18, with break: 137155013490
+    time_it(p1, "p1", "data/21_sample.txt");
+    time_it(p1, "p1", "data/21_input.txt");
+    time_it(p2, "p2", "data/21_sample.txt");
     time_it(p2, "p2", "data/21_input.txt");
 }
 
@@ -264,7 +261,7 @@ mod tests {
     fn test() {
         assert_eq!(run_it(p1, "data/21_sample.txt"), 126384);
         assert_eq!(run_it(p1, "data/21_input.txt"), 188398);
-        // assert_eq!(run_it(p2, "data/21_sample.txt"), 16);
-        // assert_eq!(run_it(p2, "data/21_input.txt"), 595975512785325);
+        assert_eq!(run_it(p2, "data/21_sample.txt"), 154115708116294);
+        assert_eq!(run_it(p2, "data/21_input.txt"), 230049027535970);
     }
 }
