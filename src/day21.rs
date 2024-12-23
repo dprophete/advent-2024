@@ -48,6 +48,13 @@ impl Dir {
     }
 }
 
+fn pp_paths(paths: &Vec<PathC>) {
+    for p in paths {
+        pp_instr(p);
+    }
+    println!();
+}
+
 fn pp_instr(instr: &PathC) {
     for i in instr {
         print!("{}", i);
