@@ -21,11 +21,11 @@ static DIR_KP: Lazy<Matrix<char>> =
     Lazy::new(|| Matrix::from_vec(vec![vec![' ', '^', 'A'], vec!['<', 'v', '>']]));
 
 // num shortest paths (from, to) -> list of shortest paths
-static NUM_SP: Lazy<HashMap<(char, char), Vec<PathC>>> =
+static NUM_SP: Lazy<HashMap<(char, char), PathC>> =
     Lazy::new(|| compute_matrix_shortest_paths(&NUM_KP));
 
 // dir shortest paths (from, to) -> list of shortest paths
-static DIR_SP: Lazy<HashMap<(char, char), Vec<PathC>>> =
+static DIR_SP: Lazy<HashMap<(char, char), PathC>> =
     Lazy::new(|| compute_matrix_shortest_paths(&DIR_KP));
 
 //--------------------------------------------------------------------------------
@@ -66,7 +66,11 @@ fn path_dir_to_path_char(path: &PathD) -> PathC {
     path.iter().map(Dir::to_dir_keypad).collect()
 }
 
-fn compute_matrix_shortest_paths(matrix: &Matrix<char>) -> HashMap<(char, char), Vec<PathC>> {
+fn compute_matrix_shortest_paths(matrix: &Matrix<char>) -> HashMap<(char, char), PathC> {
+    // println!(
+    //     "[DDA] day21:: computing shortest paths for matrix:\n{}",
+    //     matrix
+    // );
     let mut cost_at_pos = HashMap::new();
     for x0 in 0..matrix.width {
         for y0 in 0..matrix.height {
@@ -117,53 +121,44 @@ fn compute_matrix_shortest_paths(matrix: &Matrix<char>) -> HashMap<(char, char),
             }
         }
     }
-    cost_at_pos
-}
-
-pub fn combine_paths(current_paths: &Vec<PathC>, new_paths: &Vec<PathC>) -> Vec<PathC> {
-    if current_paths.is_empty() {
-        new_paths.clone()
-    } else if new_paths.is_empty() {
-        current_paths.clone()
-    } else {
-        let mut res = vec![];
-        for p in current_paths {
-            for path_to_c in new_paths {
-                let mut p = p.clone();
-                p.extend(path_to_c.clone());
-                res.push(p);
-            }
+    // we need to get down to 1 path per pair
+    let mut cost_at_pos2 = HashMap::new();
+    for (&(k1, k2), v) in &cost_at_pos {
+        if k1 == k2 {
+            cost_at_pos2.insert((k1, k2), vec!['A']);
+        } else {
+            let v = keep_one(&v);
+            cost_at_pos2.insert((k1, k2), v.clone());
         }
-        res
     }
+    cost_at_pos2
 }
 
-pub fn get_paths_for_nums(code: &Vec<char>) -> Vec<PathC> {
+pub fn get_path_for_nums(code: &Vec<char>) -> PathC {
     let mut pos_arm = 'A';
-    let mut paths_for_code: Vec<Vec<char>> = vec![];
+    let mut new_paths = vec![];
     for &c in code {
         // need to go from pos_arm to c
-        let paths_to_c = NUM_SP.get(&(pos_arm, c)).unwrap();
-        paths_for_code = combine_paths(&paths_for_code, paths_to_c);
+        let path_to_c = NUM_SP.get(&(pos_arm, c)).unwrap();
+        new_paths.push(path_to_c.clone());
         pos_arm = c;
     }
-    paths_for_code
+    new_paths.concat()
 }
 
-pub fn get_paths_for_keys(keys: &PathC) -> Vec<PathC> {
+pub fn get_path_for_keys(keys: &PathC) -> PathC {
     let mut pos_arm = 'A';
-    let mut paths_for_keys: Vec<Vec<char>> = vec![];
+    let mut new_paths = vec![];
     for &k in keys {
-        // need to go from pos_arm to c
-        let paths_to_k = DIR_SP.get(&(pos_arm, k)).unwrap();
-        paths_for_keys = combine_paths(&paths_for_keys, paths_to_k);
+        let path_to_k = DIR_SP.get(&(pos_arm, k)).unwrap();
+        new_paths.push(path_to_k.clone());
         pos_arm = k;
     }
-    paths_for_keys
+    new_paths.concat()
 }
 
 // let's iterate over the paths and count how many times we change letter
-pub fn score(path: &PathC) -> usize {
+pub fn score_change_dir(path: &PathC) -> usize {
     let mut score = 0;
     let mut last = ' ';
     for &c in path {
@@ -175,26 +170,31 @@ pub fn score(path: &PathC) -> usize {
     score
 }
 
-pub fn only_keep_good_paths(paths: &Vec<PathC>) -> Vec<PathC> {
-    let min_lens = paths.iter().map(|p| score(p)).min().unwrap();
-    let paths: Vec<PathC> = paths
-        .iter()
-        .filter(|&p| score(p) == min_lens)
-        .map(|p| p.clone())
-        .collect();
-    // paths.sort();
-    paths
+pub fn score_dist_to_a(path: &PathC) -> PathC {
+    path.iter()
+        .map(|c| match c {
+            'A' => '0',
+            '^' => '1',
+            '>' => '1',
+            'v' => '2',
+            '<' => '3',
+            _ => panic!("unexpected char {}", c),
+        })
+        .collect()
 }
 
-pub fn only_keep_shortest_paths(paths: &Vec<PathC>) -> Vec<PathC> {
+pub fn keep_one(paths: &Vec<PathC>) -> PathC {
     let min_lens = paths.iter().map(|p| p.len()).min().unwrap();
-    let paths: Vec<PathC> = paths
+    let min_score = paths.iter().map(|p| score_change_dir(p)).min().unwrap();
+
+    let mut paths: Vec<&PathC> = paths
         .iter()
         .filter(|&p| p.len() == min_lens)
-        .map(|p| p.clone())
+        .filter(|&p| score_change_dir(p) == min_score)
         .collect();
-    // paths.sort();
-    paths
+    paths.sort_by_key(|&p| score_dist_to_a(p));
+    let &lst = paths.last().unwrap();
+    lst.to_vec()
 }
 
 impl Puzzle {
@@ -207,31 +207,18 @@ impl Puzzle {
         let mut sum = 0;
         for code in &self.codes {
             println!("[DDA] day21:: trying to type code: {:?}", code);
-            let mut paths = get_paths_for_nums(code);
-            paths = only_keep_shortest_paths(&paths);
-            paths = only_keep_good_paths(&paths);
+            let mut path = get_path_for_nums(code);
 
             // paths = vec!["<v".chars().collect::<Vec<char>>()];
-            for i in 0..nb_robots {
-                paths = paths
-                    .iter()
-                    .flat_map(get_paths_for_keys)
-                    .collect::<Vec<Vec<char>>>();
-                paths = only_keep_shortest_paths(&paths);
-                paths = only_keep_good_paths(&paths);
-
-                println!(
-                    "keypad {}: nb-paths {} (len = {})",
-                    i + 1,
-                    paths.len(),
-                    paths[0].len()
-                );
+            for _i in 0..nb_robots {
+                path = get_path_for_keys(&path);
+                // println!("keypad {}: {}", i + 1, path.len());
             }
             let code_string: String = code.into_iter().collect();
             let code_str = &code_string[..3];
             let code_i32 = tousize(code_str);
             // println!("[DDA] day21:: {} x {}", code_i32, paths[0].len());
-            sum += paths[0].len() * code_i32;
+            sum += path.len() * code_i32;
             // break;
         }
         sum
@@ -245,7 +232,7 @@ fn p1(input: &str) -> usize {
 
 fn p2(input: &str) -> usize {
     let puzzle = Puzzle::from_str(input);
-    puzzle.solve_p1(25)
+    puzzle.solve_p1(15)
 }
 
 //--------------------------------------------------------------------------------
@@ -261,10 +248,11 @@ fn p2(input: &str) -> usize {
 
 pub fn run() {
     pp_day("day21: Keypad Conundrum");
-    time_it(p1, "p1", "data/21_sample.txt");
-    time_it(p1, "p1", "data/21_input.txt");
+    // time_it(p1, "p1", "data/21_sample.txt");
+    // time_it(p1, "p1", "data/21_input.txt");
     // time_it(p2, "p2", "data/21_sample.txt");
-    // time_it(p2, "p2", "data/21_input.txt");
+    //266085760
+    time_it(p2, "p2", "data/21_input.txt");
 }
 
 #[cfg(test)]
