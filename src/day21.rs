@@ -127,7 +127,7 @@ fn compute_matrix_shortest_paths(matrix: &Matrix<char>) -> HashMap<(char, char),
         if k1 == k2 {
             cost_at_pos2.insert((k1, k2), vec!['A']);
         } else {
-            let v = keep_one(&v);
+            let v = keep_one(v);
             cost_at_pos2.insert((k1, k2), v.clone());
         }
     }
@@ -183,9 +183,9 @@ pub fn score_dist_to_a(path: &PathC) -> PathC {
         .collect()
 }
 
-pub fn keep_one(paths: &Vec<PathC>) -> PathC {
+pub fn keep_one(paths: &[PathC]) -> PathC {
     let min_lens = paths.iter().map(|p| p.len()).min().unwrap();
-    let min_score = paths.iter().map(|p| score_change_dir(p)).min().unwrap();
+    let min_score = paths.iter().map(score_change_dir).min().unwrap();
 
     let mut paths: Vec<&PathC> = paths
         .iter()
@@ -210,11 +210,11 @@ impl Puzzle {
             let mut path = get_path_for_nums(code);
 
             // paths = vec!["<v".chars().collect::<Vec<char>>()];
-            for _i in 0..nb_robots {
+            for i in 0..nb_robots {
                 path = get_path_for_keys(&path);
-                // println!("keypad {}: {}", i + 1, path.len());
+                println!("keypad {}: {}", i + 1, path.len());
             }
-            let code_string: String = code.into_iter().collect();
+            let code_string: String = code.iter().collect();
             let code_str = &code_string[..3];
             let code_i32 = tousize(code_str);
             // println!("[DDA] day21:: {} x {}", code_i32, paths[0].len());
@@ -232,7 +232,7 @@ fn p1(input: &str) -> usize {
 
 fn p2(input: &str) -> usize {
     let puzzle = Puzzle::from_str(input);
-    puzzle.solve_p1(15)
+    puzzle.solve_p1(18)
 }
 
 //--------------------------------------------------------------------------------
