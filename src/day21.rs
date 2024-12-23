@@ -38,7 +38,7 @@ struct Puzzle {
 }
 
 impl Dir {
-    fn to_dir_keypad(&self) -> char {
+    fn to_dir_keypad(self) -> char {
         match self {
             Dir::Up => '^',
             Dir::Down => 'v',
@@ -56,9 +56,11 @@ fn pp_path(path: &PathC) {
 }
 
 fn path_dir_to_path_char(path: &PathD) -> PathC {
-    path.iter().map(Dir::to_dir_keypad).collect()
+    path.iter().map(|d| d.to_dir_keypad()).collect()
 }
 
+// note: this is way too complicated...
+// I might as well have hardcoded the paths
 fn compute_matrix_shortest_paths(matrix: &Matrix<char>) -> HashMap<(char, char), PathC> {
     let mut cost_at_pos = HashMap::new();
     for x0 in 0..matrix.width {
@@ -175,35 +177,34 @@ pub fn keep_one(paths: &[PathC]) -> PathC {
     lst.to_vec()
 }
 
+pub fn shortest_len(
+    pos_arm: char,
+    c: char,
+    level: usize,
+    cache: &mut HashMap<(char, char, usize), usize>,
+) -> usize {
+    if level == 1 {
+        return DIR_SP.get(&(pos_arm, c)).unwrap().len();
+    }
+    if let Some(&len) = cache.get(&(pos_arm, c, level)) {
+        return len;
+    }
+
+    let mut len = 0;
+    let path_to_c = DIR_SP.get(&(pos_arm, c)).unwrap();
+    let mut local_pos_arm = 'A';
+    for &tgt in path_to_c {
+        len += shortest_len(local_pos_arm, tgt, level - 1, cache);
+        local_pos_arm = tgt;
+    }
+    cache.insert((pos_arm, c, level), len);
+    len
+}
+
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
         let codes = input.lines().map(|line| line.chars().collect()).collect();
         Puzzle { codes }
-    }
-
-    pub fn shortest_len(
-        &self,
-        pos_arm: char,
-        c: char,
-        level: usize,
-        cache: &mut HashMap<(char, char, usize), usize>,
-    ) -> usize {
-        if level == 1 {
-            return DIR_SP.get(&(pos_arm, c)).unwrap().len();
-        }
-        if let Some(&len) = cache.get(&(pos_arm, c, level)) {
-            return len;
-        }
-
-        let mut len = 0;
-        let path_to_c = DIR_SP.get(&(pos_arm, c)).unwrap();
-        let mut local_pos_arm = 'A';
-        for &tgt in path_to_c {
-            len += self.shortest_len(local_pos_arm, tgt, level - 1, cache);
-            local_pos_arm = tgt;
-        }
-        cache.insert((pos_arm, c, level), len);
-        len
     }
 
     pub fn solve(&self, nb_robots: usize) -> usize {
@@ -216,10 +217,10 @@ impl Puzzle {
             let code_str = &code_string[..3];
             let code_i32 = tousize(code_str);
 
-            let path = get_path_for_nums(&code);
+            let path = get_path_for_nums(code);
             let mut pos_arm = 'A';
             for c in path {
-                sum += code_i32 * self.shortest_len(pos_arm, c, nb_robots, &mut cache);
+                sum += code_i32 * shortest_len(pos_arm, c, nb_robots, &mut cache);
                 pos_arm = c;
             }
         }
