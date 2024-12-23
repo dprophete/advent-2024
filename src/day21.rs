@@ -251,7 +251,8 @@ pub fn run() {
     // time_it(p1, "p1", "data/21_sample.txt");
     // time_it(p1, "p1", "data/21_input.txt");
     // time_it(p2, "p2", "data/21_sample.txt");
-    //266085760
+    //10, no break: 266085760
+    //18, with break: 137155013490
     time_it(p2, "p2", "data/21_input.txt");
 }
 
