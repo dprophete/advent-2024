@@ -38,8 +38,8 @@ fn compute_nx(secret_number: i64) -> i64 {
 
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
-        let codes = input.lines().map(toi64).collect();
-        Puzzle { secret_numbers: codes }
+        let secret_numbers = input.lines().map(toi64).collect();
+        Puzzle { secret_numbers }
     }
 
     pub fn p1(&self) -> usize {
