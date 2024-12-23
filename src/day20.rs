@@ -19,11 +19,7 @@ impl Puzzle {
         let start = racetrack.find_first('S').unwrap();
         let end = racetrack.find_first('E').unwrap();
 
-        Puzzle {
-            racetrack,
-            start,
-            end,
-        }
+        Puzzle { racetrack, start, end }
     }
 
     // pub fn pp_savings(&self, savings_for_cheat: &HashMap<(V2, V2), usize>) {

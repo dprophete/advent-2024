@@ -110,21 +110,9 @@ fn p2(area: V2, input: &str) -> i32 {
 
 pub fn run() {
     pp_day("day14: Restroom Redoubt");
-    time_it(
-        |input| p1(V2::new(11, 7), input),
-        "p1",
-        "data/14_sample.txt",
-    );
-    time_it(
-        |input| p1(V2::new(101, 103), input),
-        "p1",
-        "data/14_input.txt",
-    );
-    time_it(
-        |input| p2(V2::new(101, 103), input),
-        "p1",
-        "data/14_input.txt",
-    );
+    time_it(|input| p1(V2::new(11, 7), input), "p1", "data/14_sample.txt");
+    time_it(|input| p1(V2::new(101, 103), input), "p1", "data/14_input.txt");
+    time_it(|input| p2(V2::new(101, 103), input), "p1", "data/14_input.txt");
 }
 
 #[cfg(test)]
@@ -133,13 +121,7 @@ mod tests {
 
     #[test]
     fn test() {
-        assert_eq!(
-            run_it(|input| p1(V2::new(11, 7), input), "data/14_sample.txt"),
-            12
-        );
-        assert_eq!(
-            run_it(|input| p2(V2::new(101, 103), input), "data/14_input.txt"),
-            6516
-        );
+        assert_eq!(run_it(|input| p1(V2::new(11, 7), input), "data/14_sample.txt"), 12);
+        assert_eq!(run_it(|input| p2(V2::new(101, 103), input), "data/14_input.txt"), 6516);
     }
 }

@@ -17,11 +17,7 @@ impl Machine {
         let btn_a = parse_dirs(lines.next().unwrap());
         let btn_b = parse_dirs(lines.next().unwrap());
         let prize = parse_dirs(lines.next().unwrap());
-        Machine {
-            btn_a,
-            btn_b,
-            prize,
-        }
+        Machine { btn_a, btn_b, prize }
     }
 
     pub fn compute_cost(&self, offset: i64, enforce_limit: bool) -> i64 {

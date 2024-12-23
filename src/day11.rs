@@ -33,10 +33,7 @@ fn change_stones(stones_map: &HashMap<u64, usize>) -> HashMap<u64, usize> {
 }
 
 fn iter_n_times(stones: Vec<u64>, n: i32) -> usize {
-    let mut stones_map = stones
-        .iter()
-        .map(|&stone| (stone, 1))
-        .collect::<HashMap<_, _>>();
+    let mut stones_map = stones.iter().map(|&stone| (stone, 1)).collect::<HashMap<_, _>>();
 
     for _ in 0..n {
         stones_map = change_stones(&stones_map);

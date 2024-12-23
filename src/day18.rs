@@ -24,11 +24,7 @@ impl Memory {
         let width = bytes.iter().map(|v| v.x).max().unwrap() as usize + 1;
         let height = bytes.iter().map(|v| v.x).max().unwrap() as usize + 1;
 
-        Memory {
-            width,
-            height,
-            bytes,
-        }
+        Memory { width, height, bytes }
     }
 
     pub fn to_matrix(&self, take: usize) -> Matrix<char> {

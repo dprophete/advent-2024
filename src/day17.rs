@@ -27,13 +27,7 @@ impl Machine {
         let c = tou64(line_c.split_once(": ").unwrap().1);
         lines.next(); // empty line
         let line_prg = lines.next().unwrap();
-        let prg = line_prg
-            .split_once(": ")
-            .unwrap()
-            .1
-            .split(",")
-            .map(tou64)
-            .collect();
+        let prg = line_prg.split_once(": ").unwrap().1.split(",").map(tou64).collect();
         Machine {
             a,
             b,

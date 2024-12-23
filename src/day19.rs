@@ -15,10 +15,7 @@ struct Puzzle {
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
         let (patterns, designs) = input.split_once("\n\n").unwrap();
-        let patterns = patterns
-            .split(", ")
-            .map(|line| line.chars().collect())
-            .collect();
+        let patterns = patterns.split(", ").map(|line| line.chars().collect()).collect();
         let designs = designs.lines().map(|line| line.chars().collect()).collect();
 
         Puzzle { patterns, designs }
@@ -36,11 +33,7 @@ impl Puzzle {
         false
     }
 
-    pub fn all_solve_for_design(
-        &self,
-        cache: &mut HashMap<Vec<char>, u64>,
-        design: &Vec<char>,
-    ) -> u64 {
+    pub fn all_solve_for_design(&self, cache: &mut HashMap<Vec<char>, u64>, design: &Vec<char>) -> u64 {
         if design.is_empty() {
             return 1;
         }

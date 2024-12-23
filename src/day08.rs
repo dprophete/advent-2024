@@ -15,10 +15,7 @@ fn get_antennas(matrix: &Matrix<char>) -> HashMap<char, Vec<V2>> {
             match matrix.get(&pos) {
                 None | Some('.') => {}
                 Some(a) => {
-                    antennas
-                        .entry(a)
-                        .and_modify(|v| v.push(pos))
-                        .or_insert(vec![pos]);
+                    antennas.entry(a).and_modify(|v| v.push(pos)).or_insert(vec![pos]);
                 }
             }
         }
@@ -34,11 +31,7 @@ fn get_pairs(positions: &[V2]) -> Vec<(V2, V2)> {
     //         }
     //     }
     // }
-    positions
-        .iter()
-        .combinations(2)
-        .map(|v| (*v[0], *v[1]))
-        .collect()
+    positions.iter().combinations(2).map(|v| (*v[0], *v[1])).collect()
 }
 
 //--------------------------------------------------------------------------------

@@ -18,10 +18,7 @@ fn p1_is_equation_valid(total: i64, lst: &[i64]) -> bool {
     let mut nbs = vec![lst[0]];
 
     for nx in lst.iter().skip(1) {
-        nbs = nbs
-            .iter()
-            .flat_map(|acc| vec![acc + nx, acc * nx])
-            .collect();
+        nbs = nbs.iter().flat_map(|acc| vec![acc + nx, acc * nx]).collect();
     }
     nbs.contains(&total)
 }

@@ -17,16 +17,13 @@ static NUM_KP: Lazy<Matrix<char>> = Lazy::new(|| {
 });
 
 // dir keypad
-static DIR_KP: Lazy<Matrix<char>> =
-    Lazy::new(|| Matrix::from_vec(vec![vec![' ', '^', 'A'], vec!['<', 'v', '>']]));
+static DIR_KP: Lazy<Matrix<char>> = Lazy::new(|| Matrix::from_vec(vec![vec![' ', '^', 'A'], vec!['<', 'v', '>']]));
 
 // num shortest paths (from, to) -> list of shortest paths
-static NUM_SP: Lazy<HashMap<(char, char), PathC>> =
-    Lazy::new(|| compute_matrix_shortest_paths(&NUM_KP));
+static NUM_SP: Lazy<HashMap<(char, char), PathC>> = Lazy::new(|| compute_matrix_shortest_paths(&NUM_KP));
 
 // dir shortest paths (from, to) -> list of shortest paths
-static DIR_SP: Lazy<HashMap<(char, char), PathC>> =
-    Lazy::new(|| compute_matrix_shortest_paths(&DIR_KP));
+static DIR_SP: Lazy<HashMap<(char, char), PathC>> = Lazy::new(|| compute_matrix_shortest_paths(&DIR_KP));
 
 //--------------------------------------------------------------------------------
 // p1
@@ -177,13 +174,9 @@ pub fn keep_one(paths: &[PathC]) -> PathC {
     lst.to_vec()
 }
 
-pub fn shortest_len(
-    pos_arm: char,
-    c: char,
-    level: usize,
-    cache: &mut HashMap<(char, char, usize), usize>,
-) -> usize {
+pub fn shortest_len(pos_arm: char, c: char, level: usize, cache: &mut HashMap<(char, char, usize), usize>) -> usize {
     if level == 1 {
+        // this is us controllig the closest robot
         return DIR_SP.get(&(pos_arm, c)).unwrap().len();
     }
     if let Some(&len) = cache.get(&(pos_arm, c, level)) {
@@ -213,11 +206,12 @@ impl Puzzle {
         for code in &self.codes {
             // println!("[DDA] day21:: trying to type code: {:?}", code);
 
-            let code_string: String = code.iter().collect();
-            let code_str = &code_string[..3];
-            let code_i32 = tousize(code_str);
+            let code_string: String = code.iter().filter(|c| c.is_ascii_digit()).collect();
+            let code_i32 = tousize(&code_string);
 
+            // this is the path we need the final robot to type on the door
             let path = get_path_for_nums(code);
+
             let mut pos_arm = 'A';
             for c in path {
                 sum += code_i32 * shortest_len(pos_arm, c, nb_robots, &mut cache);

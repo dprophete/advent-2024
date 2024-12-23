@@ -27,11 +27,7 @@ fn is_safe_p1(line: &[i32]) -> bool {
 }
 
 fn p1(input: &str) -> usize {
-    input
-        .lines()
-        .map(parse_line)
-        .filter(|l| is_safe_p1(l))
-        .count()
+    input.lines().map(parse_line).filter(|l| is_safe_p1(l)).count()
 }
 
 //--------------------------------------------------------------------------------
@@ -52,11 +48,7 @@ fn is_safe_p2(line: &[i32]) -> bool {
 }
 
 fn p2(input: &str) -> usize {
-    input
-        .lines()
-        .map(parse_line)
-        .filter(|l| is_safe_p2(l))
-        .count()
+    input.lines().map(parse_line).filter(|l| is_safe_p2(l)).count()
 }
 
 //--------------------------------------------------------------------------------

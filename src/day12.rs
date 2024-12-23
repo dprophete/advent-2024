@@ -45,10 +45,7 @@ fn get_perimeter_for_region(region: &HashSet<V2>) -> usize {
     let mut sides = HashSet::new();
 
     // we scale the region by 2 and put the fences in the 'middle'
-    let scaled_region = region
-        .iter()
-        .map(|pos| pos.scale(2))
-        .collect::<HashSet<_>>();
+    let scaled_region = region.iter().map(|pos| pos.scale(2)).collect::<HashSet<_>>();
     for pos in scaled_region {
         for dir in [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT] {
             let side = pos.add(&dir);
@@ -91,10 +88,7 @@ fn get_nb_sides_for_region(region: &HashSet<V2>) -> usize {
     let mut sides = HashSet::new();
 
     // we scale the region by 2 and put the fences in the 'middle'
-    let scaled_region = region
-        .iter()
-        .map(|pos| pos.scale(2))
-        .collect::<HashSet<_>>();
+    let scaled_region = region.iter().map(|pos| pos.scale(2)).collect::<HashSet<_>>();
     for pos in scaled_region.clone() {
         for dir in [V2::UP, V2::DOWN, V2::LEFT, V2::RIGHT] {
             let side = pos.add(&dir);
