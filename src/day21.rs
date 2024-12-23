@@ -170,7 +170,7 @@ pub fn score(path: &PathC) -> usize {
 
 pub fn only_keep_good_paths(paths: &Vec<PathC>) -> Vec<PathC> {
     let min_lens = paths.iter().map(|p| score(p)).min().unwrap();
-    let mut paths: Vec<PathC> = paths
+    let paths: Vec<PathC> = paths
         .iter()
         .filter(|&p| score(p) == min_lens)
         .map(|p| p.clone())
@@ -181,7 +181,7 @@ pub fn only_keep_good_paths(paths: &Vec<PathC>) -> Vec<PathC> {
 
 pub fn only_keep_shortest_paths(paths: &Vec<PathC>) -> Vec<PathC> {
     let min_lens = paths.iter().map(|p| p.len()).min().unwrap();
-    let mut paths: Vec<PathC> = paths
+    let paths: Vec<PathC> = paths
         .iter()
         .filter(|&p| p.len() == min_lens)
         .map(|p| p.clone())
