@@ -1,6 +1,5 @@
-use std::collections::{HashMap, HashSet};
-
 use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 
 use crate::utils::*;
 
@@ -12,7 +11,6 @@ use crate::utils::*;
 struct Puzzle {
     connections: HashSet<(usize, usize)>, // list of connections between computers
     graph: HashMap<usize, Vec<usize>>,    // for each computer, list of connected computers
-    computers: HashSet<usize>,            // name of each computer
 }
 
 fn comp_name_to_comp_id(comp_name: &str) -> usize {
@@ -56,12 +54,7 @@ impl Puzzle {
             graph.entry(l).or_default().push(r);
         }
 
-        let computers: HashSet<usize> = graph.keys().cloned().collect();
-        Puzzle {
-            connections,
-            graph,
-            computers,
-        }
+        Puzzle { connections, graph }
     }
 
     pub fn p1(&self) -> usize {
