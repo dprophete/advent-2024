@@ -1,7 +1,7 @@
+use once_cell::sync::Lazy;
 use std::collections::HashMap;
 
 use crate::utils::*;
-use once_cell::sync::Lazy;
 
 type PathD = Vec<Dir>;
 type PathC = Vec<char>;

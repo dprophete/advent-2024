@@ -1,5 +1,6 @@
-use crate::utils::*;
 use std::cmp::Ordering;
+
+use crate::utils::*;
 
 type Rule = (i32, i32);
 type Rules = Vec<Rule>;

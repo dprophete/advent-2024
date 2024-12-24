@@ -1,10 +1,10 @@
-use crate::utils::*;
-
 use itertools::Itertools;
 use std::{
     collections::{HashMap, HashSet},
     convert::identity,
 };
+
+use crate::utils::*;
 
 // find antennas: we build a hahsmap: antenna (char) -> list of positions (vec<V2>)
 fn get_antennas(matrix: &Matrix<char>) -> HashMap<char, Vec<V2>> {
