@@ -1,6 +1,5 @@
+use regex::Regex;
 use std::collections::{HashMap, HashSet};
-
-use itertools::Itertools;
 
 use crate::utils::*;
 
@@ -8,140 +7,132 @@ use crate::utils::*;
 // p1
 //--------------------------------------------------------------------------------
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+enum Op {
+    And,
+    Or,
+    Xor,
+}
+
+impl Op {
+    pub fn eval(&self, in1: bool, in2: bool) -> bool {
+        match self {
+            Op::And => in1 && in2,
+            Op::Or => in1 || in2,
+            Op::Xor => in1 ^ in2,
+        }
+    }
+
+    pub fn from_str(s: &str) -> Op {
+        match s {
+            "AND" => Op::And,
+            "OR" => Op::Or,
+            "XOR" => Op::Xor,
+            _ => panic!("invalid op {}", s),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+struct Gate {
+    in1: String, // input wire 1
+    in2: String, // input wire 2
+    out: String, // output wire
+    op: Op,
+}
+
+impl Gate {
+    pub fn eval(&self, wires: &HashMap<String, bool>) -> bool {
+        let in1 = wires.get(&self.in1).unwrap();
+        let in2 = wires.get(&self.in2).unwrap();
+        self.op.eval(*in1, *in2)
+    }
+}
+
 #[derive(Debug, Clone)]
 struct Puzzle {
-    connections: HashSet<(usize, usize)>, // list of connections between computers
-    graph: HashMap<usize, Vec<usize>>,    // for each computer, list of connected computers
-    computers: HashSet<usize>,            // name of each computer
-}
-
-fn comp_name_to_comp_id(comp_name: &str) -> usize {
-    let chars = comp_name.chars().collect::<Vec<_>>();
-    let c0 = chars[0];
-    let c1 = chars[1];
-    (c1 as usize) + (c0 as usize) * 256
-}
-
-fn comp_id_to_comp_name(comp_id: usize) -> String {
-    let c0 = char::from_u32((comp_id / 256) as u32).unwrap();
-    let c1 = char::from_u32((comp_id % 256) as u32).unwrap();
-    format!("{}{}", c0, c1)
-}
-
-fn comp_ids_to_comp_names(comp_ids: &[usize]) -> Vec<String> {
-    comp_ids.iter().map(|&c| comp_id_to_comp_name(c)).collect()
-}
-
-fn is_starting_with_t(comp_id: usize) -> bool {
-    let c0 = char::from_u32((comp_id / 256) as u32).unwrap();
-    c0 == 't'
+    wires: HashMap<String, bool>,
+    gates: Vec<Gate>,
 }
 
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
-        // connection: map (comp_id, comp_id)
-        let connections: HashSet<(usize, usize)> = input
+        let (wires_str, gates_str) = input.split_once("\n\n").unwrap();
+
+        // wires
+        let wires: HashMap<String, bool> = wires_str
             .lines()
-            .flat_map(|line| {
-                let (l_str, r_str) = line.split_once("-").unwrap();
-                let l = comp_name_to_comp_id(l_str);
-                let r = comp_name_to_comp_id(r_str);
-                [(l, r), (r, l)]
+            .map(|line| {
+                let (w, v) = line.split_once(": ").unwrap();
+                (String::from(w), v == "1")
             })
             .collect();
 
-        // prepare graph
-        let mut graph: HashMap<usize, Vec<usize>> = HashMap::new();
-        for &(l, r) in connections.iter() {
-            graph.entry(l).or_default().push(r);
-        }
+        // gates
+        let gates = gates_str
+            .lines()
+            .map(|line| {
+                let re = Regex::new(r"^(\w+) (\w+) (\w+) -> (\w+)$").unwrap();
+                let (_, [in1, op, in2, out]) = re.captures(line).unwrap().extract();
+                Gate {
+                    in1: String::from(in1),
+                    in2: String::from(in2),
+                    out: String::from(out),
+                    op: Op::from_str(op),
+                }
+            })
+            .collect();
 
-        let computers: HashSet<usize> = graph.keys().cloned().collect();
-        Puzzle {
-            connections,
-            graph,
-            computers,
-        }
+        Puzzle { wires, gates }
     }
 
-    pub fn p1(&self) -> usize {
-        let mut triplets = HashSet::new();
-        for (&c1, connections) in &self.graph {
-            if connections.len() < 2 {
-                continue;
-            }
-            for &c2 in connections.iter() {
-                for &c3 in connections.iter() {
-                    if c2 == c3 {
+    pub fn eval(&mut self) {
+        let mut gates_to_eval: HashSet<&Gate> = HashSet::new();
+        for g in self.gates.iter() {
+            gates_to_eval.insert(g);
+        }
+
+        // we are going to evaluate all the gates which have their wire ready
+        // and then go back to the beginning until all gates are evaluated
+        // note: this is not optimal at all...
+        // ideally we build a proper graph of gate evaluation order
+        while !gates_to_eval.is_empty() {
+            let mut gates_to_remove = vec![];
+            for &g in gates_to_eval.iter() {
+                match (self.wires.get(&g.in1), self.wires.get(&g.in2)) {
+                    (Some(&in1), Some(&in2)) => {
+                        let gate_out = g.op.eval(in1, in2);
+                        self.wires.insert(g.out.clone(), gate_out);
+                        gates_to_remove.push(g);
+                    }
+                    _ => {
                         continue;
                     }
-                    // we already have c1 <-> c2
-                    // we already have c1 <-> c3
-                    if self.connections.contains(&(c2, c3))
-                        && (is_starting_with_t(c1) || is_starting_with_t(c2) || is_starting_with_t(c3))
-                    {
-                        let mut triplet = [c1, c2, c3];
-                        triplet.sort();
-                        triplets.insert(triplet);
-                    }
                 }
             }
+            for g in gates_to_remove {
+                gates_to_eval.remove(g);
+            }
         }
-        triplets.len()
     }
 
-    pub fn pw_for_clusters_of_size_n(&self, n: usize) -> Option<String> {
-        for (&c1, connections_to_c1) in &self.graph {
-            if connections_to_c1.len() < n {
-                continue;
-            }
-            for combs in connections_to_c1.iter().combinations(n) {
-                // combs is a set of n computers connectred to c1
+    pub fn p1(&mut self) -> usize {
+        self.eval();
 
-                // then let's check that they all have at least n connections
-                let all_with_n_conns = combs.iter().all(|&&c| self.graph.get(&c).unwrap().len() >= n);
-                if !all_with_n_conns {
-                    continue;
-                }
-
-                // now check if they are all connected to each other
-                let all_connected = combs
-                    .iter()
-                    .map(|&&c| c)
-                    .combinations(2)
-                    .all(|pair| self.connections.contains(&(pair[0], pair[1])));
-                if !all_connected {
-                    continue;
-                }
-
-                let mut comps_in_cluster: Vec<usize> = combs.iter().map(|&&c| c).collect();
-                comps_in_cluster.push(c1);
-                comps_in_cluster.sort();
-                let pw = comps_in_cluster
-                    .into_iter()
-                    .map(comp_id_to_comp_name)
-                    .collect::<Vec<_>>()
-                    .join(",");
-                return Some(pw);
-            }
-        }
-        None
-    }
-
-    pub fn p2(&self) -> String {
-        let max_connections = self.graph.values().map(|v| v.len()).max().unwrap();
-
-        for i in (2..=max_connections).rev() {
-            if let Some(pw) = self.pw_for_clusters_of_size_n(i) {
-                return pw;
-            }
-        }
-        String::new()
+        // collect all the z wires
+        let mut z_wires = self
+            .wires
+            .iter()
+            .filter(|(k, _)| k.starts_with("z"))
+            .collect::<Vec<_>>();
+        z_wires.sort_by(|(k1, _), (k2, _)| k2.cmp(k1));
+        let z_wires_str = String::from_iter(z_wires.iter().map(|(_, &v)| if v { '1' } else { '0' }));
+        usize::from_str_radix(&z_wires_str, 2).unwrap()
     }
 }
 
 fn p1(input: &str) -> usize {
-    let puzzle = Puzzle::from_str(input);
+    let mut puzzle = Puzzle::from_str(input);
     puzzle.p1()
 }
 
@@ -149,10 +140,10 @@ fn p1(input: &str) -> usize {
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2(input: &str) -> String {
-    let puzzle = Puzzle::from_str(input);
-    puzzle.p2()
-}
+// fn p2(input: &str) -> String {
+//     let puzzle = Puzzle::from_str(input);
+//     puzzle.p2()
+// }
 
 //--------------------------------------------------------------------------------
 // main
@@ -161,9 +152,10 @@ fn p2(input: &str) -> String {
 pub fn run() {
     pp_day("day24: Crossed Wires");
     time_it(p1, "p1", "data/24_sample.txt");
+    time_it(p1, "p1", "data/24_sample2.txt");
     time_it(p1, "p1", "data/24_input.txt");
-    time_it(p2, "p2", "data/24_sample.txt");
-    time_it(p2, "p2", "data/24_input.txt");
+    // time_it(p2, "p2", "data/24_sample.txt");
+    // time_it(p2, "p2", "data/24_input.txt");
 }
 
 #[cfg(test)]
@@ -172,12 +164,13 @@ mod tests {
 
     #[test]
     fn test() {
-        assert_eq!(run_it(p1, "data/24_sample.txt"), 7);
-        assert_eq!(run_it(p1, "data/24_input.txt"), 1284);
-        assert_eq!(run_it(p2, "data/24_sample.txt"), "co,de,ka,ta");
-        assert_eq!(
-            run_it(p2, "data/24_input.txt"),
-            "bv,cm,dk,em,gs,jv,ml,oy,qj,ri,uo,xk,yw"
-        );
+        assert_eq!(run_it(p1, "data/24_sample.txt"), 4);
+        assert_eq!(run_it(p1, "data/24_sample2.txt"), 2024);
+        assert_eq!(run_it(p1, "data/24_input.txt"), 55544677167336);
+        // assert_eq!(run_it(p2, "data/24_sample.txt"), "co,de,ka,ta");
+        // assert_eq!(
+        //     run_it(p2, "data/24_input.txt"),
+        //     "bv,cm,dk,em,gs,jv,ml,oy,qj,ri,uo,xk,yw"
+        // );
     }
 }
