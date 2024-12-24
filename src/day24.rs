@@ -116,38 +116,113 @@ impl Puzzle {
         }
     }
 
-    fn wires_with_prefix(&self, prefix: char) -> String {
+    // pub fn eval_wire(&mut self) {
+    //     if self.wires.contains_key("a") {
+    //         return;
+    //     }
+    // }
+    //
+    // pub fn eval2(&mut self) {
+    //     let z_wires = self
+    //         .wires
+    //         .keys()
+    //         .filter(|(k)| k.chars().nth(0).unwrap() == 'z')
+    //         .collect::<Vec<_>>();
+    //
+    //
+    //     let mut gates_to_eval: HashSet<&Gate> = HashSet::new();
+    //     for g in self.gates.iter() {
+    //         gates_to_eval.insert(g);
+    //     }
+    //
+    //     // we are going to evaluate all the gates which have their wire ready
+    //     // and then go back to the beginning until all gates are evaluated
+    //     // note: this is not optimal at all...
+    //     // ideally we build a proper graph of gate evaluation order
+    //     while !gates_to_eval.is_empty() {
+    //         let mut gates_to_remove = vec![];
+    //         for &g in gates_to_eval.iter() {
+    //             match (self.wires.get(&g.in1), self.wires.get(&g.in2)) {
+    //                 (Some(&in1), Some(&in2)) => {
+    //                     let gate_out = g.op.eval(in1, in2);
+    //                     self.wires.insert(g.out.clone(), gate_out);
+    //                     gates_to_remove.push(g);
+    //                 }
+    //                 _ => {
+    //                     continue;
+    //                 }
+    //             }
+    //         }
+    //         for g in gates_to_remove {
+    //             gates_to_eval.remove(g);
+    //         }
+    //     }
+    // }
+
+    fn get_var(&self, var: char) -> usize {
+        // all the wires starting with the var prefix
         let mut wires = self
             .wires
             .iter()
-            .filter(|(k, _)| k.chars().nth(0).unwrap() == prefix)
+            .filter(|(k, _)| k.chars().nth(0).unwrap() == var)
             .map(|k| k.clone())
             .collect::<Vec<_>>();
+        // sort them (z4, z3, z2, z1, z0)
         wires.sort_by(|(k1, _), (k2, _)| k2.cmp(k1));
-        String::from_iter(wires.iter().map(|(_, &v)| if v { '1' } else { '0' }))
+        // convert to a usize
+        wires
+            .into_iter()
+            .map(|(_, &v)| v)
+            .fold(0usize, |acc, b| (acc << 1) | (b as usize))
     }
 
-    pub fn p1(&mut self) -> usize {
-        self.eval();
+    fn set_var(&mut self, var: char, value: usize) {
+        // for part2, x and y are 45bits, z is 46bits
+        let bits_padded = if var == 'z' {
+            format!("{:046b}", value)
+        } else {
+            format!("{:045b}", value)
+        };
+        for (i, b) in bits_padded.chars().rev().enumerate() {
+            let wire_name = format!("{}{:02}", var, i);
+            // println!("[DDA] day24::wire_name {} to {}", wire_name,kb);
+            self.wires.insert(wire_name, b == '1');
+        }
+    }
 
-        let z = self.wires_with_prefix('z');
-        usize::from_str_radix(&z, 2).unwrap()
+    pub fn debug_wires(&self) {
+        let x = self.get_var('x');
+        let y = self.get_var('y');
+        let z = self.get_var('z');
+        println!("x  {:045b}", x);
+        println!("y  {:045b}", y);
+        println!("z {:046b}", z);
     }
 }
 
 fn p1(input: &str) -> usize {
     let mut puzzle = Puzzle::from_str(input);
-    puzzle.p1()
+
+    puzzle.eval();
+    puzzle.get_var('z')
 }
 
 //--------------------------------------------------------------------------------
 // p2
 //--------------------------------------------------------------------------------
 
-// fn p2(input: &str) -> String {
-//     let puzzle = Puzzle::from_str(input);
-//     puzzle.p2()
-// }
+fn p2(input: &str) -> usize {
+    let mut puzzle = Puzzle::from_str(input);
+    println!("puzzle: #gates {}, #wires {}", puzzle.gates.len(), puzzle.wires.len());
+
+    puzzle.set_var('x', 0b100000000000000000000000000000000000000000000);
+    puzzle.set_var('y', 0b100000000000000000000000000000000000000000000);
+
+    puzzle.eval();
+    puzzle.debug_wires();
+    // usize::from_str_radix(&z, 2).unwrap()
+    10
+}
 
 //--------------------------------------------------------------------------------
 // main
@@ -155,11 +230,10 @@ fn p1(input: &str) -> usize {
 
 pub fn run() {
     pp_day("day24: Crossed Wires");
-    time_it(p1, "p1", "data/24_sample.txt");
-    time_it(p1, "p1", "data/24_sample2.txt");
-    time_it(p1, "p1", "data/24_input.txt");
-    // time_it(p2, "p2", "data/24_sample.txt");
-    // time_it(p2, "p2", "data/24_input.txt");
+    // time_it(p1, "p1", "data/24_sample.txt");
+    // time_it(p1, "p1", "data/24_sample2.txt");
+    // time_it(p1, "p1", "data/24_input.txt");
+    time_it(p2, "p2", "data/24_input.txt");
 }
 
 #[cfg(test)]
