@@ -81,45 +81,12 @@ impl Puzzle {
                 }
             }
         }
-
-        // for &c1 in self.computers.iter() {
-        //     for &c2 in self.computers.iter() {
-        //         if c1 == c2 {
-        //             continue;
-        //         }
-        //         for &c3 in self.computers.iter() {
-        //             if c1 == c3 || c2 == c3 {
-        //                 continue;
-        //             }
-        //             if !valid_comps.contains(&c1) && !valid_comps.contains(&c2) && !valid_comps.contains(&c3) {
-        //                 continue;
-        //             }
-        //             if self.connections.contains(&(c1, c2))
-        //                 && self.connections.contains(&(c2, c3))
-        //                 && self.connections.contains(&(c3, c1))
-        //             {
-        //                 let mut triplet = [c1, c2, c3];
-        //                 triplet.sort();
-        //                 triplets.insert(triplet);
-        //             }
-        //         }
-        //     }
-        // }
-
         triplets.len()
     }
 }
 
 fn p1(input: &str) -> usize {
     let puzzle = Puzzle::from_str(input);
-
-    // println!("[DDA] day23:: {} -> {}", "ta", comp_name_to_comp_id("ta"));
-    // println!("[DDA] day23:: {} -> {}", 24948, comp_id_to_comp_name(24948));
-    // println!(
-    //     "[DDA] day23:: #computers: {}, #conn {}",
-    //     puzzle.computers.len(),
-    //     puzzle.connections.len(),
-    // );
     puzzle.p1()
 }
 
@@ -127,10 +94,10 @@ fn p1(input: &str) -> usize {
 // p2
 //--------------------------------------------------------------------------------
 
-// fn p2(input: &str) -> usize {
-//     let puzzle = Puzzle::from_str(input);
-//     puzzle.p2()
-// }
+fn p2(input: &str) -> usize {
+    let puzzle = Puzzle::from_str(input);
+    puzzle.p2()
+}
 
 //--------------------------------------------------------------------------------
 // main
