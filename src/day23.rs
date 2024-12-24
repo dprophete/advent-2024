@@ -26,6 +26,11 @@ fn comp_id_to_comp_name(comp_id: usize) -> String {
     format!("{}{}", c1, c0)
 }
 
+fn is_starting_with_t(comp_id: usize) -> bool {
+    let c1 = char::from_u32((comp_id % 256) as u32).unwrap();
+    c1 == 't'
+}
+
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
         // connection: map (comp_id, comp_id)
@@ -53,24 +58,7 @@ impl Puzzle {
         }
     }
 
-    // fn dfs(&self, node: &str, visited: &mut Vec<String>) {
-    //     visited.push(node.to_string());
-    //     if let Some(neighbors) = self.graph.get(node) {
-    //         for neighbor in neighbors {
-    //             if !visited.contains(neighbor) {
-    //                 self.dfs(neighbor, visited);
-    //             }
-    //         }
-    //     }
-    // }
-
     pub fn p1(&self) -> usize {
-        let valid_comps = self
-            .computers
-            .iter()
-            .filter(|&c| comp_id_to_comp_name(*c).starts_with("t"))
-            .collect::<HashSet<_>>();
-
         let mut triplets = HashSet::new();
         for (&c1, connections) in &self.graph {
             if connections.len() < 2 {
@@ -84,7 +72,7 @@ impl Puzzle {
                     // we already have c1 <-> c2
                     // we already have c1 <-> c3
                     if self.connections.contains(&(c2, c3))
-                        && (valid_comps.contains(&c1) || valid_comps.contains(&c2) || valid_comps.contains(&c3))
+                        && (is_starting_with_t(c1) || is_starting_with_t(c2) || is_starting_with_t(c3))
                     {
                         let mut triplet = [c1, c2, c3];
                         triplet.sort();
