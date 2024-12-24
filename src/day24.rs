@@ -116,18 +116,22 @@ impl Puzzle {
         }
     }
 
+    fn wires_with_prefix(&self, prefix: char) -> String {
+        let mut wires = self
+            .wires
+            .iter()
+            .filter(|(k, _)| k.chars().nth(0).unwrap() == prefix)
+            .map(|k| k.clone())
+            .collect::<Vec<_>>();
+        wires.sort_by(|(k1, _), (k2, _)| k2.cmp(k1));
+        String::from_iter(wires.iter().map(|(_, &v)| if v { '1' } else { '0' }))
+    }
+
     pub fn p1(&mut self) -> usize {
         self.eval();
 
-        // collect all the z wires
-        let mut z_wires = self
-            .wires
-            .iter()
-            .filter(|(k, _)| k.starts_with("z"))
-            .collect::<Vec<_>>();
-        z_wires.sort_by(|(k1, _), (k2, _)| k2.cmp(k1));
-        let z_wires_str = String::from_iter(z_wires.iter().map(|(_, &v)| if v { '1' } else { '0' }));
-        usize::from_str_radix(&z_wires_str, 2).unwrap()
+        let z = self.wires_with_prefix('z');
+        usize::from_str_radix(&z, 2).unwrap()
     }
 }
 
