@@ -83,10 +83,9 @@ impl Puzzle {
                     }
                     // we already have c1 <-> c2
                     // we already have c1 <-> c3
-                    if self.connections.contains(&(c2, c3)) {
-                        if !valid_comps.contains(&c1) && !valid_comps.contains(&c2) && !valid_comps.contains(&c3) {
-                            continue;
-                        }
+                    if self.connections.contains(&(c2, c3))
+                        && (valid_comps.contains(&c1) || valid_comps.contains(&c2) || valid_comps.contains(&c3))
+                    {
                         let mut triplet = [c1, c2, c3];
                         triplet.sort();
                         triplets.insert(triplet);
