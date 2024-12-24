@@ -47,7 +47,7 @@ impl Puzzle {
         // prepare graph
         let mut graph: HashMap<usize, Vec<usize>> = HashMap::new();
         for &(l, r) in connections.iter() {
-            graph.entry(l).or_insert(vec![]).push(r);
+            graph.entry(l).or_default().push(r);
         }
 
         let computers: HashSet<usize> = graph.keys().cloned().collect();
@@ -82,6 +82,33 @@ impl Puzzle {
             }
         }
         triplets.len()
+    }
+
+    pub fn p2(&self) -> usize {
+        // let mut triplets = HashSet::new();
+        // for (&c1, connections) in &self.graph {
+        //     if connections.len() < 2 {
+        //         continue;
+        //     }
+        //     for &c2 in connections.iter() {
+        //         for &c3 in connections.iter() {
+        //             if c2 == c3 {
+        //                 continue;
+        //             }
+        //             // we already have c1 <-> c2
+        //             // we already have c1 <-> c3
+        //             if self.connections.contains(&(c2, c3))
+        //                 && (is_starting_with_t(c1) || is_starting_with_t(c2) || is_starting_with_t(c3))
+        //             {
+        //                 let mut triplet = [c1, c2, c3];
+        //                 triplet.sort();
+        //                 triplets.insert(triplet);
+        //             }
+        //         }
+        //     }
+        // }
+        // triplets.len()
+        10
     }
 }
 
