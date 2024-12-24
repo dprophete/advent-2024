@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+use itertools::Itertools;
+
 use crate::utils::*;
 
 //--------------------------------------------------------------------------------
@@ -17,18 +19,22 @@ fn comp_name_to_comp_id(comp_name: &str) -> usize {
     let chars = comp_name.chars().collect::<Vec<_>>();
     let c0 = chars[0];
     let c1 = chars[1];
-    (c0 as usize) + (c1 as usize) * 256
+    (c1 as usize) + (c0 as usize) * 256
 }
 
 fn comp_id_to_comp_name(comp_id: usize) -> String {
     let c0 = char::from_u32((comp_id / 256) as u32).unwrap();
     let c1 = char::from_u32((comp_id % 256) as u32).unwrap();
-    format!("{}{}", c1, c0)
+    format!("{}{}", c0, c1)
+}
+
+fn comp_ids_to_comp_names(comp_ids: &[usize]) -> Vec<String> {
+    comp_ids.iter().map(|&c| comp_id_to_comp_name(c)).collect()
 }
 
 fn is_starting_with_t(comp_id: usize) -> bool {
-    let c1 = char::from_u32((comp_id % 256) as u32).unwrap();
-    c1 == 't'
+    let c0 = char::from_u32((comp_id / 256) as u32).unwrap();
+    c0 == 't'
 }
 
 impl Puzzle {
@@ -84,31 +90,55 @@ impl Puzzle {
         triplets.len()
     }
 
-    pub fn p2(&self) -> usize {
-        // let mut triplets = HashSet::new();
-        // for (&c1, connections) in &self.graph {
-        //     if connections.len() < 2 {
-        //         continue;
-        //     }
-        //     for &c2 in connections.iter() {
-        //         for &c3 in connections.iter() {
-        //             if c2 == c3 {
-        //                 continue;
-        //             }
-        //             // we already have c1 <-> c2
-        //             // we already have c1 <-> c3
-        //             if self.connections.contains(&(c2, c3))
-        //                 && (is_starting_with_t(c1) || is_starting_with_t(c2) || is_starting_with_t(c3))
-        //             {
-        //                 let mut triplet = [c1, c2, c3];
-        //                 triplet.sort();
-        //                 triplets.insert(triplet);
-        //             }
-        //         }
-        //     }
-        // }
-        // triplets.len()
-        10
+    pub fn clusters_of_size_n(&self, n: usize) -> HashSet<Vec<usize>> {
+        let mut triplets = HashSet::new();
+        for (&c1, connections_to_c1) in &self.graph {
+            if connections_to_c1.len() < n {
+                continue;
+            }
+            for combs in connections_to_c1.iter().combinations(n) {
+                // combs is a set of n computers connectred to c1
+
+                // then let's check that they all have at least n connections
+                let all_with_n_conns = combs.iter().all(|&&c| self.graph.get(&c).unwrap().len() >= n);
+                if !all_with_n_conns {
+                    continue;
+                }
+
+                // now check if they are all connected to each other
+                let all_connected = combs
+                    .iter()
+                    .map(|&&c| c)
+                    .combinations(2)
+                    .all(|pair| self.connections.contains(&(pair[0], pair[1])));
+                if !all_connected {
+                    continue;
+                }
+
+                let mut triplet: Vec<usize> = combs.iter().map(|&&c| c).collect();
+                triplet.push(c1);
+                triplet.sort();
+                // triplet.reverse();
+                triplets.insert(triplet);
+            }
+        }
+        triplets
+    }
+
+    pub fn p2(&self) -> String {
+        let max_connections = self.graph.values().map(|v| v.len()).max().unwrap();
+        println!("[DDA] day23::max_connections {:?}", max_connections);
+
+        let mut largest_cluster = String::new();
+
+        for i in 2..=max_connections {
+            let clusters = self.clusters_of_size_n(i);
+            if clusters.len() == 1 {
+                let first = clusters.iter().next().unwrap();
+                largest_cluster = comp_ids_to_comp_names(first).join(",");
+            }
+        }
+        largest_cluster.clone()
     }
 }
 
@@ -121,7 +151,7 @@ fn p1(input: &str) -> usize {
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2(input: &str) -> usize {
+fn p2(input: &str) -> String {
     let puzzle = Puzzle::from_str(input);
     puzzle.p2()
 }
@@ -134,8 +164,8 @@ pub fn run() {
     pp_day("day23: LAN Party");
     time_it(p1, "p1", "data/23_sample.txt");
     time_it(p1, "p1", "data/23_input.txt");
-    // time_it(p2, "p2", "data/23_sample.txt");
-    // time_it(p2, "p2", "data/23_input.txt");
+    time_it(p2, "p2", "data/23_sample.txt");
+    time_it(p2, "p2", "data/23_input.txt");
 }
 
 #[cfg(test)]
@@ -146,7 +176,10 @@ mod tests {
     fn test() {
         assert_eq!(run_it(p1, "data/23_sample.txt"), 7);
         assert_eq!(run_it(p1, "data/23_input.txt"), 1284);
-        // assert_eq!(run_it(p2, "data/23_sample.txt"), 23);
-        // assert_eq!(run_it(p2, "data/23_input.txt"), 1612);
+        assert_eq!(run_it(p2, "data/23_sample.txt"), "co,de,ka,ta");
+        assert_eq!(
+            run_it(p2, "data/23_input.txt"),
+            "bv,cm,dk,em,gs,jv,ml,oy,qj,ri,uo,xk,yw"
+        );
     }
 }
