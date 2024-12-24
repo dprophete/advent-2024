@@ -2,100 +2,114 @@ use std::collections::{HashMap, HashSet};
 
 use crate::utils::*;
 
-// a sequence of 4 consecutive changes
-type Seq = (i8, i8, i8, i8);
-
-const SEQ_NOOP: i8 = -100;
-
 //--------------------------------------------------------------------------------
 // p1
 //--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone)]
 struct Puzzle {
-    secret_numbers: Vec<i64>,
+    connections: HashSet<(usize, usize)>, // list of connections between computers
+    graph: HashMap<usize, Vec<usize>>,    // for each computer, list of connected computers
+    computers: HashSet<usize>,            // name of each computer
 }
 
-fn compute_nx(secret_number: i64) -> i64 {
-    let result = secret_number * 64;
-    // mix result into secret_number
-    let secret_number = result ^ secret_number;
-    // prune secret_number
-    let secret_number = secret_number % 16777216;
+fn comp_name_to_comp_id(comp_name: &str) -> usize {
+    let chars = comp_name.chars().collect::<Vec<_>>();
+    let c0 = chars[0];
+    let c1 = chars[1];
+    (c0 as usize) + (c1 as usize) * 256
+}
 
-    let result = secret_number / 32;
-    // mix result into secret_number
-    let secret_number = result ^ secret_number;
-    // prune secret_number
-    let secret_number = secret_number % 16777216;
-
-    let result = secret_number * 2048;
-    // mix result into secret_number
-    let secret_number = result ^ secret_number;
-    // prune secret_number
-    secret_number % 16777216
+fn comp_id_to_comp_name(comp_id: usize) -> String {
+    let c0 = char::from_u32((comp_id / 256) as u32).unwrap();
+    let c1 = char::from_u32((comp_id % 256) as u32).unwrap();
+    format!("{}{}", c1, c0)
 }
 
 impl Puzzle {
     pub fn from_str(input: &str) -> Puzzle {
-        let codes = input.lines().map(toi64).collect();
-        Puzzle { secret_numbers: codes }
+        // connection: map (comp_id, comp_id)
+        let connections: HashSet<(usize, usize)> = input
+            .lines()
+            .flat_map(|line| {
+                let (l_str, r_str) = line.split_once("-").unwrap();
+                let l = comp_name_to_comp_id(l_str);
+                let r = comp_name_to_comp_id(r_str);
+                [(l, r), (r, l)]
+            })
+            .collect();
+
+        // prepare graph
+        let mut graph: HashMap<usize, Vec<usize>> = HashMap::new();
+        for &(l, r) in connections.iter() {
+            graph.entry(l).or_insert(vec![]).push(r);
+        }
+
+        let computers: HashSet<usize> = graph.keys().cloned().collect();
+        Puzzle {
+            connections,
+            graph,
+            computers,
+        }
     }
+
+    // fn dfs(&self, node: &str, visited: &mut Vec<String>) {
+    //     visited.push(node.to_string());
+    //     if let Some(neighbors) = self.graph.get(node) {
+    //         for neighbor in neighbors {
+    //             if !visited.contains(neighbor) {
+    //                 self.dfs(neighbor, visited);
+    //             }
+    //         }
+    //     }
+    // }
 
     pub fn p1(&self) -> usize {
-        let mut sum = 0;
-        sum
-    }
+        let valid_comps = self
+            .computers
+            .iter()
+            .filter(|&c| comp_id_to_comp_name(*c).starts_with("t"))
+            .collect::<HashSet<_>>();
 
-    pub fn p2(&self) -> usize {
-        let mut seqs_for_all_sellers = vec![];
-        let mut distinct_seqs = HashSet::new();
-
-        for &secret_number in &self.secret_numbers {
-            let mut new_secret_number = secret_number;
-            let mut seqs_for_seller = HashMap::new();
-
-            let mut current_ones = (new_secret_number % 10) as i8;
-
-            let mut seq: Seq = (SEQ_NOOP, SEQ_NOOP, SEQ_NOOP, SEQ_NOOP);
-
-            // we are going to generate 2000 changes
-            for i in 0..2000 {
-                new_secret_number = compute_nx(new_secret_number);
-
-                let new_current_one = (new_secret_number % 10) as i8;
-                let new_change = new_current_one - current_ones;
-                current_ones = new_current_one;
-
-                seq = (seq.1, seq.2, seq.3, new_change);
-                if i >= 3 && !seqs_for_seller.contains_key(&seq) {
-                    distinct_seqs.insert(seq);
-                    seqs_for_seller.insert(seq, new_current_one);
+        let mut triplets = HashSet::new();
+        for &c1 in self.computers.iter() {
+            for &c2 in self.computers.iter() {
+                if c1 == c2 {
+                    continue;
                 }
-            }
-
-            seqs_for_all_sellers.push(seqs_for_seller);
-        }
-
-        let mut max_nb_bananas = 0;
-        for seq_to_test in distinct_seqs {
-            let mut nb_bananas_for_seq = 0;
-            for seqs_for_seller in &seqs_for_all_sellers {
-                if let Some(&bananas) = seqs_for_seller.get(&seq_to_test) {
-                    nb_bananas_for_seq += bananas as usize;
+                for &c3 in self.computers.iter() {
+                    if c1 == c3 || c2 == c3 {
+                        continue;
+                    }
+                    if !valid_comps.contains(&c1) && !valid_comps.contains(&c2) && !valid_comps.contains(&c3) {
+                        continue;
+                    }
+                    if self.connections.contains(&(c1, c2))
+                        && self.connections.contains(&(c2, c3))
+                        && self.connections.contains(&(c3, c1))
+                    {
+                        let mut triplet = [c1, c2, c3];
+                        triplet.sort();
+                        triplets.insert(triplet);
+                    }
                 }
-            }
-            if nb_bananas_for_seq > max_nb_bananas {
-                max_nb_bananas = nb_bananas_for_seq;
             }
         }
 
-        max_nb_bananas
+        triplets.len()
     }
 }
 
 fn p1(input: &str) -> usize {
     let puzzle = Puzzle::from_str(input);
+
+    // println!("[DDA] day23:: {} -> {}", "ta", comp_name_to_comp_id("ta"));
+    // println!("[DDA] day23:: {} -> {}", 24948, comp_id_to_comp_name(24948));
+    // println!(
+    //     "[DDA] day23:: #computers: {}, #conn {}",
+    //     puzzle.computers.len(),
+    //     puzzle.connections.len(),
+    // );
     puzzle.p1()
 }
 
@@ -113,9 +127,9 @@ fn p1(input: &str) -> usize {
 //--------------------------------------------------------------------------------
 
 pub fn run() {
-    pp_day("day23: Keypad Conundrum");
+    pp_day("day23: LAN Party");
     time_it(p1, "p1", "data/23_sample.txt");
-    // time_it(p1, "p1", "data/23_input.txt");
+    time_it(p1, "p1", "data/23_input.txt");
     // time_it(p2, "p2", "data/23_sample.txt");
     // time_it(p2, "p2", "data/23_input.txt");
 }
@@ -127,7 +141,7 @@ mod tests {
     #[test]
     fn test() {
         assert_eq!(run_it(p1, "data/23_sample.txt"), 7);
-        // assert_eq!(run_it(p1, "data/23_input.txt"), 13584398738);
+        assert_eq!(run_it(p1, "data/23_input.txt"), 1284);
         // assert_eq!(run_it(p2, "data/23_sample.txt"), 23);
         // assert_eq!(run_it(p2, "data/23_input.txt"), 1612);
     }
