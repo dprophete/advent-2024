@@ -72,22 +72,21 @@ impl Puzzle {
             .collect::<HashSet<_>>();
 
         let mut triplets = HashSet::new();
-        for &c1 in self.computers.iter() {
-            for &c2 in self.computers.iter() {
-                if c1 == c2 {
-                    continue;
-                }
-                for &c3 in self.computers.iter() {
-                    if c1 == c3 || c2 == c3 {
+        for (&c1, connections) in &self.graph {
+            if connections.len() < 2 {
+                continue;
+            }
+            for &c2 in connections.iter() {
+                for &c3 in connections.iter() {
+                    if c2 == c3 {
                         continue;
                     }
-                    if !valid_comps.contains(&c1) && !valid_comps.contains(&c2) && !valid_comps.contains(&c3) {
-                        continue;
-                    }
-                    if self.connections.contains(&(c1, c2))
-                        && self.connections.contains(&(c2, c3))
-                        && self.connections.contains(&(c3, c1))
-                    {
+                    // we already have c1 <-> c2
+                    // we already have c1 <-> c3
+                    if self.connections.contains(&(c2, c3)) {
+                        if !valid_comps.contains(&c1) && !valid_comps.contains(&c2) && !valid_comps.contains(&c3) {
+                            continue;
+                        }
                         let mut triplet = [c1, c2, c3];
                         triplet.sort();
                         triplets.insert(triplet);
@@ -95,6 +94,30 @@ impl Puzzle {
                 }
             }
         }
+
+        // for &c1 in self.computers.iter() {
+        //     for &c2 in self.computers.iter() {
+        //         if c1 == c2 {
+        //             continue;
+        //         }
+        //         for &c3 in self.computers.iter() {
+        //             if c1 == c3 || c2 == c3 {
+        //                 continue;
+        //             }
+        //             if !valid_comps.contains(&c1) && !valid_comps.contains(&c2) && !valid_comps.contains(&c3) {
+        //                 continue;
+        //             }
+        //             if self.connections.contains(&(c1, c2))
+        //                 && self.connections.contains(&(c2, c3))
+        //                 && self.connections.contains(&(c3, c1))
+        //             {
+        //                 let mut triplet = [c1, c2, c3];
+        //                 triplet.sort();
+        //                 triplets.insert(triplet);
+        //             }
+        //         }
+        //     }
+        // }
 
         triplets.len()
     }
