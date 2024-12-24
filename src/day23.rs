@@ -90,8 +90,7 @@ impl Puzzle {
         triplets.len()
     }
 
-    pub fn clusters_of_size_n(&self, n: usize) -> HashSet<Vec<usize>> {
-        let mut triplets = HashSet::new();
+    pub fn pw_for_clusters_of_size_n(&self, n: usize) -> Option<String> {
         for (&c1, connections_to_c1) in &self.graph {
             if connections_to_c1.len() < n {
                 continue;
@@ -115,30 +114,29 @@ impl Puzzle {
                     continue;
                 }
 
-                let mut triplet: Vec<usize> = combs.iter().map(|&&c| c).collect();
-                triplet.push(c1);
-                triplet.sort();
-                // triplet.reverse();
-                triplets.insert(triplet);
+                let mut comps_in_cluster: Vec<usize> = combs.iter().map(|&&c| c).collect();
+                comps_in_cluster.push(c1);
+                comps_in_cluster.sort();
+                let pw = comps_in_cluster
+                    .into_iter()
+                    .map(comp_id_to_comp_name)
+                    .collect::<Vec<_>>()
+                    .join(",");
+                return Some(pw);
             }
         }
-        triplets
+        None
     }
 
     pub fn p2(&self) -> String {
         let max_connections = self.graph.values().map(|v| v.len()).max().unwrap();
-        println!("[DDA] day23::max_connections {:?}", max_connections);
 
-        let mut largest_cluster = String::new();
-
-        for i in 2..=max_connections {
-            let clusters = self.clusters_of_size_n(i);
-            if clusters.len() == 1 {
-                let first = clusters.iter().next().unwrap();
-                largest_cluster = comp_ids_to_comp_names(first).join(",");
+        for i in (2..=max_connections).rev() {
+            if let Some(pw) = self.pw_for_clusters_of_size_n(i) {
+                return pw;
             }
         }
-        largest_cluster.clone()
+        String::new()
     }
 }
 
