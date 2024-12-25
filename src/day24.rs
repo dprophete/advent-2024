@@ -1,5 +1,10 @@
+use core::fmt;
 use regex::Regex;
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::Display,
+    fs,
+};
 
 use crate::utils::*;
 
@@ -30,6 +35,18 @@ impl Op {
             "XOR" => Op::Xor,
             _ => panic!("invalid op {}", s),
         }
+    }
+}
+
+impl Display for Op {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let s = match self {
+            Op::And => "AND",
+            Op::Or => "OR",
+            Op::Xor => "XOR",
+        };
+        write!(f, "{}", s)?;
+        Ok(())
     }
 }
 
@@ -248,6 +265,14 @@ fn p2(input: &str) -> usize {
     10
 }
 
+fn mermaid(input: &str) {
+    let puzzle = Puzzle::from_str(input);
+
+    // manual solution: we convert the graph to mermaid format, feed it to https://mermaid.live
+    // and visually try to detect the anomalies...
+    puzzle.to_mermaid();
+}
+
 //--------------------------------------------------------------------------------
 // main
 //--------------------------------------------------------------------------------
@@ -258,6 +283,9 @@ pub fn run() {
     // time_it(p1, "p1", "data/24_sample2.txt");
     // time_it(p1, "p1", "data/24_input.txt");
     time_it(p2, "p2", "data/24_input.txt");
+
+    // let input = fs::read_to_string("data/24_input2.txt").expect("cannot read sample file");
+    // mermaid(&input);
 }
 
 #[cfg(test)]
