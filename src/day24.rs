@@ -216,33 +216,11 @@ impl Puzzle {
         self.to_mermaid_subgraph_var('x');
         self.to_mermaid_subgraph_var('y');
 
-        self.to_mermaid_subgraph_var('z');
-
         for g in self.gates.iter() {
             println!("  {} & {} --> {}_{}[{}] --> {}", g.in1, g.in2, g.op, g.out, g.op, g.out);
         }
-        // subgraph y
-        // for (k, v) in self.wires.iter() {
-        //     println!("  {}[{}] -->|{}| {}[{}];", k, v, v, k, v);
-        // }
-        // for g in self.gates.iter() {
-        //     println!(
-        //         "  {}[{}] -->|{}| {}[{}];",
-        //         g.in1,
-        //         self.wires.get(&g.in1).unwrap(),
-        //         g.op,
-        //         g.out,
-        //         self.wires.get(&g.out).unwrap()
-        //     );
-        //     println!(
-        //         "  {}[{}] -->|{}| {}[{}];",
-        //         g.in2,
-        //         self.wires.get(&g.in2).unwrap(),
-        //         g.op,
-        //         g.out,
-        //         self.wires.get(&g.out).unwrap()
-        //     );
-        // }
+
+        self.to_mermaid_subgraph_var('z');
     }
 }
 
