@@ -104,6 +104,18 @@ impl Puzzle {
     }
 
     pub fn eval(&mut self) {
+        // first reset all computed wires
+        let keys = self.wires.keys().cloned().collect::<Vec<_>>();
+        for wire in keys {
+            match wire.chars().nth(0).unwrap() {
+                'x' | 'y' => {}
+                _ => {
+                    self.wires.remove(&wire);
+                }
+            }
+        }
+
+        // now ready to eval
         let mut gates_to_eval: HashSet<&Gate> = HashSet::new();
         for g in self.gates.iter() {
             gates_to_eval.insert(g);
@@ -216,6 +228,26 @@ impl Puzzle {
         println!("z {:046b}", z);
     }
 
+    pub fn check_add(&mut self, x: usize, y: usize) -> bool {
+        self.set_var('x', x);
+        self.set_var('y', y);
+        self.eval();
+        let z = self.get_var('z');
+        if x + y == z {
+            // println!("good:");
+            // println!("  x  {:045b}", x);
+            // println!("  y  {:045b}", y);
+            // println!("  z {:046b}", z);
+            true
+        } else {
+            println!("bad:");
+            println!("  x  {:045b}", x);
+            println!("  y  {:045b}", y);
+            println!("  z {:046b}", z);
+            false
+        }
+    }
+
     pub fn to_mermaid_subgraph_var(&self, var: char) {
         println!("  subgraph Inputs{}", var.to_uppercase());
         println!(
@@ -254,14 +286,10 @@ fn p1(input: &str) -> usize {
 
 fn p2(input: &str) -> usize {
     let mut puzzle = Puzzle::from_str(input);
-    println!("puzzle: #gates {}, #wires {}", puzzle.gates.len(), puzzle.wires.len());
 
-    puzzle.set_var('x', 0b100000000000000000000000000000000000000000000);
-    puzzle.set_var('y', 0b100000000000000000000000000000000000000000000);
-
-    puzzle.eval();
-    puzzle.debug_wires();
-    // usize::from_str_radix(&z, 2).unwrap()
+    for i in 0..45 {
+        puzzle.check_add(1 << i, 1 << i);
+    }
     10
 }
 
@@ -281,8 +309,8 @@ pub fn run() {
     pp_day("day24: Crossed Wires");
     // time_it(p1, "p1", "data/24_sample.txt");
     // time_it(p1, "p1", "data/24_sample2.txt");
-    // time_it(p1, "p1", "data/24_input.txt");
-    time_it(p2, "p2", "data/24_input.txt");
+    // time_it(p2, "p2", "data/24_input.txt");
+    time_it(p2, "p2", "data/24_input2.txt");
 
     // let input = fs::read_to_string("data/24_input2.txt").expect("cannot read sample file");
     // mermaid(&input);
@@ -297,10 +325,5 @@ mod tests {
         assert_eq!(run_it(p1, "data/24_sample.txt"), 4);
         assert_eq!(run_it(p1, "data/24_sample2.txt"), 2024);
         assert_eq!(run_it(p1, "data/24_input.txt"), 55544677167336);
-        // assert_eq!(run_it(p2, "data/24_sample.txt"), "co,de,ka,ta");
-        // assert_eq!(
-        //     run_it(p2, "data/24_input.txt"),
-        //     "bv,cm,dk,em,gs,jv,ml,oy,qj,ri,uo,xk,yw"
-        // );
     }
 }
