@@ -93,8 +93,6 @@ pub fn run() {
     pp_day("day25: Code Chronicle");
     time_it(p1, "p1", "data/25_sample.txt");
     time_it(p1, "p1", "data/25_input.txt");
-    // time_it(p2, "p2", "data/25_sample.txt");
-    // time_it(p2, "p2", "data/25_input.txt");
 }
 
 #[cfg(test)]
@@ -103,12 +101,7 @@ mod tests {
 
     #[test]
     fn test() {
-        assert_eq!(run_it(p1, "data/25_sample.txt"), 7);
-        // assert_eq!(run_it(p1, "data/25_input.txt"), 1284);
-        // assert_eq!(run_it(p2, "data/25_sample.txt"), "co,de,ka,ta");
-        // assert_eq!(
-        //     run_it(p2, "data/25_input.txt"),
-        //     "bv,cm,dk,em,gs,jv,ml,oy,qj,ri,uo,xk,yw"
-        // );
+        assert_eq!(run_it(p1, "data/25_sample.txt"), 3);
+        assert_eq!(run_it(p1, "data/25_input.txt"), 3155);
     }
 }
