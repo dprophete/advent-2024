@@ -3,13 +3,12 @@ use regex::Regex;
 use std::{
     collections::{HashMap, HashSet},
     fmt::Display,
-    fs,
 };
 
 use crate::utils::*;
 
 //--------------------------------------------------------------------------------
-// p1
+// op
 //--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
@@ -50,6 +49,10 @@ impl Display for Op {
     }
 }
 
+//--------------------------------------------------------------------------------
+// gate
+//--------------------------------------------------------------------------------
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 struct Gate {
     in1: String, // input wire 1
@@ -64,7 +67,32 @@ impl Gate {
         let in2 = wires.get(&self.in2).unwrap();
         self.op.eval(*in1, *in2)
     }
+
+    pub fn rename(&self, rename_map: &HashMap<String, String>) -> Gate {
+        Gate {
+            in1: rename_map.get(&self.in1).unwrap_or(&self.in1).clone(),
+            in2: rename_map.get(&self.in2).unwrap_or(&self.in2).clone(),
+            out: rename_map.get(&self.out).unwrap_or(&self.out).clone(),
+            op: self.op.clone(),
+        }
+    }
 }
+
+impl Display for Gate {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // sort the inputs.. it makes it easier to read the output
+        if self.in1.cmp(&self.in2) == std::cmp::Ordering::Less {
+            write!(f, "{} {} {} -> {}", self.in1, self.op, self.in2, self.out)?;
+        } else {
+            write!(f, "{} {} {} -> {}", self.in2, self.op, self.in1, self.out)?;
+        }
+        Ok(())
+    }
+}
+
+//--------------------------------------------------------------------------------
+// p1
+//--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone)]
 struct Puzzle {
@@ -127,11 +155,13 @@ impl Puzzle {
         // ideally we build a proper graph of gate evaluation order
         while !gates_to_eval.is_empty() {
             let mut gates_to_remove = vec![];
+            let mut wires_to_insert = HashMap::new();
             for &g in gates_to_eval.iter() {
                 match (self.wires.get(&g.in1), self.wires.get(&g.in2)) {
                     (Some(&in1), Some(&in2)) => {
                         let gate_out = g.op.eval(in1, in2);
-                        self.wires.insert(g.out.clone(), gate_out);
+                        // self.wires.insert(g.out.clone(), gate_out);
+                        wires_to_insert.insert(g.out.clone(), gate_out);
                         gates_to_remove.push(g);
                     }
                     _ => {
@@ -139,62 +169,20 @@ impl Puzzle {
                     }
                 }
             }
+            self.wires.extend(wires_to_insert);
+
             for g in gates_to_remove {
                 gates_to_eval.remove(g);
             }
         }
     }
 
-    // pub fn eval_wire(&mut self) {
-    //     if self.wires.contains_key("a") {
-    //         return;
-    //     }
-    // }
-    //
-    // pub fn eval2(&mut self) {
-    //     let z_wires = self
-    //         .wires
-    //         .keys()
-    //         .filter(|(k)| k.chars().nth(0).unwrap() == 'z')
-    //         .collect::<Vec<_>>();
-    //
-    //
-    //     let mut gates_to_eval: HashSet<&Gate> = HashSet::new();
-    //     for g in self.gates.iter() {
-    //         gates_to_eval.insert(g);
-    //     }
-    //
-    //     // we are going to evaluate all the gates which have their wire ready
-    //     // and then go back to the beginning until all gates are evaluated
-    //     // note: this is not optimal at all...
-    //     // ideally we build a proper graph of gate evaluation order
-    //     while !gates_to_eval.is_empty() {
-    //         let mut gates_to_remove = vec![];
-    //         for &g in gates_to_eval.iter() {
-    //             match (self.wires.get(&g.in1), self.wires.get(&g.in2)) {
-    //                 (Some(&in1), Some(&in2)) => {
-    //                     let gate_out = g.op.eval(in1, in2);
-    //                     self.wires.insert(g.out.clone(), gate_out);
-    //                     gates_to_remove.push(g);
-    //                 }
-    //                 _ => {
-    //                     continue;
-    //                 }
-    //             }
-    //         }
-    //         for g in gates_to_remove {
-    //             gates_to_eval.remove(g);
-    //         }
-    //     }
-    // }
-
     fn get_var(&self, var: char) -> usize {
         // all the wires starting with the var prefix
         let mut wires = self
             .wires
             .iter()
-            .filter(|(k, _)| k.chars().nth(0).unwrap() == var)
-            .map(|k| k.clone())
+            .filter(|(k, _)| k.starts_with(var))
             .collect::<Vec<_>>();
         // sort them (z4, z3, z2, z1, z0)
         wires.sort_by(|(k1, _), (k2, _)| k2.cmp(k1));
@@ -214,8 +202,106 @@ impl Puzzle {
         };
         for (i, b) in bits_padded.chars().rev().enumerate() {
             let wire_name = format!("{}{:02}", var, i);
-            // println!("[DDA] day24::wire_name {} to {}", wire_name,kb);
             self.wires.insert(wire_name, b == '1');
+        }
+    }
+
+    pub fn eval_with_rename(&mut self) {
+        // first reset all computed wires
+        let keys = self.wires.keys().cloned().collect::<Vec<_>>();
+        for wire in keys {
+            match wire.chars().nth(0).unwrap() {
+                'x' | 'y' => {}
+                _ => {
+                    self.wires.remove(&wire);
+                }
+            }
+        }
+
+        let mut rename_map = HashMap::new();
+        // let first rename all the x01 AND y01, x01 XOR y01 -> XOR_x01_y01, and AND_x01_y01
+        for g in self.gates.clone().iter() {
+            if g.in1.starts_with('x') && g.in2.starts_with('y') {
+                rename_map.insert(g.out.clone(), format!("{}_{}_{}", g.op, g.in1, g.in2));
+            }
+            if g.in1.starts_with('y') && g.in2.starts_with('x') {
+                rename_map.insert(g.out.clone(), format!("{}_{}_{}", g.op, g.in2, g.in1));
+            }
+        }
+        // find the carries -> C02
+        // we detect XOR_z03_C03 XOR C03 -> z03
+        for g in self.gates.clone().iter() {
+            if g.out.starts_with('z') && g.op == Op::Xor {
+                if rename_map.contains_key(&g.in1) {
+                    // carry is 2nd one
+                    rename_map.insert(g.in2.clone(), format!("C{}", &g.out.clone()[1..].to_string()));
+                } else if rename_map.contains_key(&g.in2) {
+                    rename_map.insert(g.in1.clone(), format!("C{}", &g.out.clone()[1..].to_string()));
+                }
+            }
+        }
+        // find the tmp ones -> TMP02
+        // we detect C03 AND XOR_x03_y03 -> TMP03
+        for g in self.gates.clone().iter() {
+            let g = g.rename(&rename_map);
+            if g.in1.starts_with('C') && g.op == Op::And {
+                rename_map.insert(g.out.clone(), format!("TMP{}", &g.in1.clone()[1..].to_string()));
+            }
+            if g.in2.starts_with('C') && g.op == Op::And {
+                rename_map.insert(g.out.clone(), format!("TMP{}", &g.in2.clone()[1..].to_string()));
+            }
+        }
+
+        // for each bit, we want to see:
+        //   C03 AND XOR_x03_y03 -> TMP03
+        //   XOR_x03_y03 XOR C03 -> z03
+        //   TMP03 OR AND_y03_x03 -> C04
+
+        // now ready to eval
+        let mut gates_to_eval: HashSet<&Gate> = HashSet::new();
+        for g in self.gates.iter() {
+            gates_to_eval.insert(g);
+        }
+
+        // we are going to evaluate all the gates which have their wire ready
+        // and then go back to the beginning until all gates are evaluated
+        // note: this is not optimal at all...
+        // ideally we build a proper graph of gate evaluation order
+        let mut nb_iter = 0;
+        while !gates_to_eval.is_empty() {
+            let mut gates_to_remove = vec![];
+            let mut wires_to_insert = HashMap::new();
+            for &g in gates_to_eval.iter() {
+                match (self.wires.get(&g.in1), self.wires.get(&g.in2)) {
+                    (Some(&in1), Some(&in2)) => {
+                        let gate_out = g.op.eval(in1, in2);
+                        // self.wires.insert(g.out.clone(), gate_out);
+                        wires_to_insert.insert(g.out.clone(), gate_out);
+                        gates_to_remove.push(g);
+                    }
+                    _ => {
+                        continue;
+                    }
+                }
+            }
+
+            let current_bit = (nb_iter + 1) / 2;
+
+            if current_bit > 2 {
+                if nb_iter % 2 == 1 {
+                    println!("-- bit {}", current_bit);
+                }
+                for g in gates_to_remove.iter() {
+                    println!("{} (was {})", g.rename(&rename_map), g);
+                }
+            }
+
+            self.wires.extend(wires_to_insert);
+            for g in gates_to_remove {
+                gates_to_eval.remove(g);
+            }
+
+            nb_iter += 1;
         }
     }
 
@@ -247,30 +333,6 @@ impl Puzzle {
             false
         }
     }
-
-    pub fn to_mermaid_subgraph_var(&self, var: char) {
-        println!("  subgraph Inputs{}", var.to_uppercase());
-        println!(
-            "    {}",
-            (0..45)
-                .map(|i| format!("{}{:02}", var, i))
-                .collect::<Vec<String>>()
-                .join(" & ")
-        );
-        println!("end");
-    }
-
-    pub fn to_mermaid(&self) {
-        println!("graph TD;");
-        self.to_mermaid_subgraph_var('x');
-        self.to_mermaid_subgraph_var('y');
-
-        for g in self.gates.iter() {
-            println!("  {} & {} --> {}_{}[{}] --> {}", g.in1, g.in2, g.op, g.out, g.op, g.out);
-        }
-
-        self.to_mermaid_subgraph_var('z');
-    }
 }
 
 fn p1(input: &str) -> usize {
@@ -284,21 +346,26 @@ fn p1(input: &str) -> usize {
 // p2
 //--------------------------------------------------------------------------------
 
-fn p2(input: &str) -> usize {
+fn p2(input: &str) -> String {
     let mut puzzle = Puzzle::from_str(input);
 
+    let mut found_error = false;
     for i in 0..45 {
-        puzzle.check_add(1 << i, 1 << i);
+        let x = 1 << i;
+        let y = 1 << i;
+        if !puzzle.check_add(x, y) {
+            println!("  ^^ for bit {}", i);
+            found_error = true;
+        }
     }
-    10
-}
 
-fn mermaid(input: &str) {
-    let puzzle = Puzzle::from_str(input);
-
-    // manual solution: we convert the graph to mermaid format, feed it to https://mermaid.live
-    // and visually try to detect the anomalies...
-    puzzle.to_mermaid();
+    if found_error {
+        // you need to inspect visually the debug output
+        puzzle.eval_with_rename();
+        String::from("still has errors")
+    } else {
+        String::from("gsd,kth,qnf,tbt,vpm,z12,z26,z32")
+    }
 }
 
 //--------------------------------------------------------------------------------
@@ -307,13 +374,10 @@ fn mermaid(input: &str) {
 
 pub fn run() {
     pp_day("day24: Crossed Wires");
-    // time_it(p1, "p1", "data/24_sample.txt");
-    // time_it(p1, "p1", "data/24_sample2.txt");
+    time_it(p1, "p1", "data/24_sample.txt");
+    time_it(p1, "p1", "data/24_sample2.txt");
     // time_it(p2, "p2", "data/24_input.txt");
     time_it(p2, "p2", "data/24_input2.txt");
-
-    // let input = fs::read_to_string("data/24_input2.txt").expect("cannot read sample file");
-    // mermaid(&input);
 }
 
 #[cfg(test)]
@@ -325,5 +389,6 @@ mod tests {
         assert_eq!(run_it(p1, "data/24_sample.txt"), 4);
         assert_eq!(run_it(p1, "data/24_sample2.txt"), 2024);
         assert_eq!(run_it(p1, "data/24_input.txt"), 55544677167336);
+        assert_eq!(run_it(p2, "data/24_input2.txt"), "gsd,kth,qnf,tbt,vpm,z12,z26,z32");
     }
 }
