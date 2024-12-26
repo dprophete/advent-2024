@@ -68,7 +68,7 @@ impl Gate {
         self.op.eval(*in1, *in2)
     }
 
-    pub fn rename(&self, rename_map: &HashMap<String, String>) -> Gate {
+    pub fn with_rename(&self, rename_map: &HashMap<String, String>) -> Gate {
         Gate {
             in1: rename_map.get(&self.in1).unwrap_or(&self.in1).clone(),
             in2: rename_map.get(&self.in2).unwrap_or(&self.in2).clone(),
@@ -81,11 +81,11 @@ impl Gate {
 impl Display for Gate {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // sort the inputs.. it makes it easier to read the output
-        if self.in1.cmp(&self.in2) == std::cmp::Ordering::Less {
-            write!(f, "{} {} {} -> {}", self.in1, self.op, self.in2, self.out)?;
-        } else {
-            write!(f, "{} {} {} -> {}", self.in2, self.op, self.in1, self.out)?;
-        }
+        // if self.in1.cmp(&self.in2) == std::cmp::Ordering::Less {
+        //     write!(f, "{} {} {} -> {}", self.in1, self.op, self.in2, self.out)?;
+        // } else {
+        write!(f, "{} {} {} -> {}", self.in2, self.op, self.in1, self.out)?;
+        // }
         Ok(())
     }
 }
@@ -131,8 +131,8 @@ impl Puzzle {
         Puzzle { wires, gates }
     }
 
-    pub fn eval(&mut self) {
-        // first reset all computed wires
+    // reset all computed wires (only keep x and y)
+    pub fn reset_wires(&mut self) {
         let keys = self.wires.keys().cloned().collect::<Vec<_>>();
         for wire in keys {
             match wire.chars().nth(0).unwrap() {
@@ -142,6 +142,11 @@ impl Puzzle {
                 }
             }
         }
+    }
+
+    // run machine
+    pub fn eval(&mut self) {
+        self.reset_wires();
 
         // now ready to eval
         let mut gates_to_eval: HashSet<&Gate> = HashSet::new();
@@ -177,6 +182,7 @@ impl Puzzle {
         }
     }
 
+    // get the value of a var (x, y, z) by reading all the x01, x02, etc... wires
     fn get_var(&self, var: char) -> usize {
         // all the wires starting with the var prefix
         let mut wires = self
@@ -193,6 +199,7 @@ impl Puzzle {
             .fold(0usize, |acc, b| (acc << 1) | (b as usize))
     }
 
+    // set the value of a var (x, y, z) by setting all the x01, x02, etc... wires
     fn set_var(&mut self, var: char, value: usize) {
         // for part2, x and y are 45bits, z is 46bits
         let bits_padded = if var == 'z' {
@@ -206,18 +213,15 @@ impl Puzzle {
         }
     }
 
-    pub fn eval_with_rename(&mut self) {
-        // first reset all computed wires
-        let keys = self.wires.keys().cloned().collect::<Vec<_>>();
-        for wire in keys {
-            match wire.chars().nth(0).unwrap() {
-                'x' | 'y' => {}
-                _ => {
-                    self.wires.remove(&wire);
-                }
-            }
-        }
-
+    // we are going to rename the wires to make it easier to debug
+    // we want to get to a point where for each bit, we have the following:
+    //
+    //   C03 AND XOR_x03_y03 -> TMP03
+    //   XOR_x03_y03 XOR C03 -> z03
+    //   TMP03 OR AND_y03_x03 -> C04
+    //
+    // let's compute a map of old-name -> new-name
+    pub fn compute_rename_map(&self) -> HashMap<String, String> {
         let mut rename_map = HashMap::new();
         // let first rename all the x01 AND y01, x01 XOR y01 -> XOR_x01_y01, and AND_x01_y01
         for g in self.gates.clone().iter() {
@@ -243,7 +247,7 @@ impl Puzzle {
         // find the tmp ones -> TMP02
         // we detect C03 AND XOR_x03_y03 -> TMP03
         for g in self.gates.clone().iter() {
-            let g = g.rename(&rename_map);
+            let g = g.with_rename(&rename_map);
             if g.in1.starts_with('C') && g.op == Op::And {
                 rename_map.insert(g.out.clone(), format!("TMP{}", &g.in1.clone()[1..].to_string()));
             }
@@ -251,11 +255,13 @@ impl Puzzle {
                 rename_map.insert(g.out.clone(), format!("TMP{}", &g.in2.clone()[1..].to_string()));
             }
         }
+        rename_map
+    }
 
-        // for each bit, we want to see:
-        //   C03 AND XOR_x03_y03 -> TMP03
-        //   XOR_x03_y03 XOR C03 -> z03
-        //   TMP03 OR AND_y03_x03 -> C04
+    pub fn eval_with_rename(&mut self) {
+        self.reset_wires();
+
+        let rename_map = self.compute_rename_map();
 
         // now ready to eval
         let mut gates_to_eval: HashSet<&Gate> = HashSet::new();
@@ -285,6 +291,13 @@ impl Puzzle {
                 }
             }
 
+            // display the section for each bit
+            // for each bit, we want to see:
+            //   C03 AND XOR_x03_y03 -> TMP03
+            //   XOR_x03_y03 XOR C03 -> z03
+            //   TMP03 OR AND_y03_x03 -> C04
+            //
+            // if it's not exactly that, there is an error with the wires
             let current_bit = (nb_iter + 1) / 2;
 
             if current_bit > 2 {
@@ -292,7 +305,7 @@ impl Puzzle {
                     println!("-- bit {}", current_bit);
                 }
                 for g in gates_to_remove.iter() {
-                    println!("{} (was {})", g.rename(&rename_map), g);
+                    println!("{} (was {})", g.with_rename(&rename_map), g);
                 }
             }
 
@@ -305,32 +318,37 @@ impl Puzzle {
         }
     }
 
-    pub fn debug_wires(&self) {
-        let x = self.get_var('x');
-        let y = self.get_var('y');
-        let z = self.get_var('z');
-        println!("x  {:045b}", x);
-        println!("y  {:045b}", y);
-        println!("z {:046b}", z);
-    }
-
     pub fn check_add(&mut self, x: usize, y: usize) -> bool {
         self.set_var('x', x);
         self.set_var('y', y);
         self.eval();
         let z = self.get_var('z');
-        if x + y == z {
-            // println!("good:");
-            // println!("  x  {:045b}", x);
-            // println!("  y  {:045b}", y);
-            // println!("  z {:046b}", z);
-            true
-        } else {
+        if x + y != z {
             println!("bad:");
             println!("  x  {:045b}", x);
             println!("  y  {:045b}", y);
             println!("  z {:046b}", z);
-            false
+            return false;
+        }
+        true
+    }
+
+    pub fn swap_wires(&mut self, wire1: &str, wire2: &str) {
+        self.rename_wire(wire1, "TMP_SWAP");
+        self.rename_wire(wire2, wire1);
+        self.rename_wire("TMP_SWAP", wire2);
+    }
+
+    pub fn rename_wire(&mut self, old: &str, new: &str) {
+        // first rename wire it exists
+        if let Some(value) = self.wires.remove(old) {
+            self.wires.insert(String::from(new), value);
+        }
+        // then rename wire in gates
+        for g in self.gates.iter_mut() {
+            if g.out == old {
+                g.out = String::from(new);
+            }
         }
     }
 }
@@ -349,6 +367,18 @@ fn p1(input: &str) -> usize {
 fn p2(input: &str) -> String {
     let mut puzzle = Puzzle::from_str(input);
 
+    // without swapping any wires we find issues with bits 11, 12, 25, 26, 31, 36
+    //
+    // bit 11 & bit 12
+    puzzle.swap_wires("kth", "z12");
+    // bit 25 & bit 26
+    puzzle.swap_wires("gsd", "z26");
+    // bit 31
+    puzzle.swap_wires("tbt", "z32");
+    // bit 36
+    puzzle.swap_wires("vpm", "qnf");
+
+    // after swapping we shouldn't see any errors
     let mut found_error = false;
     for i in 0..45 {
         let x = 1 << i;
@@ -376,8 +406,7 @@ pub fn run() {
     pp_day("day24: Crossed Wires");
     time_it(p1, "p1", "data/24_sample.txt");
     time_it(p1, "p1", "data/24_sample2.txt");
-    // time_it(p2, "p2", "data/24_input.txt");
-    time_it(p2, "p2", "data/24_input2.txt");
+    time_it(p2, "p2", "data/24_input.txt");
 }
 
 #[cfg(test)]
@@ -389,6 +418,6 @@ mod tests {
         assert_eq!(run_it(p1, "data/24_sample.txt"), 4);
         assert_eq!(run_it(p1, "data/24_sample2.txt"), 2024);
         assert_eq!(run_it(p1, "data/24_input.txt"), 55544677167336);
-        assert_eq!(run_it(p2, "data/24_input2.txt"), "gsd,kth,qnf,tbt,vpm,z12,z26,z32");
+        assert_eq!(run_it(p2, "data/24_input.txt"), "gsd,kth,qnf,tbt,vpm,z12,z26,z32");
     }
 }
