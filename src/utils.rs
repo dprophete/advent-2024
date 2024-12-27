@@ -95,8 +95,7 @@ impl V2 {
 
 impl Display for V2 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "({},{})", self.x, self.y)?;
-        Ok(())
+        write!(f, "({},{})", self.x, self.y)
     }
 }
 
@@ -169,11 +168,7 @@ impl<T: Clone + PartialEq> Matrix<T> {
     pub fn from_vec(matrix: Vec<Vec<T>>) -> Matrix<T> {
         let height = matrix.len() as i32;
         let width = matrix[0].len() as i32;
-        Matrix {
-            matrix,
-            width,
-            height,
-        }
+        Matrix { matrix, width, height }
     }
 
     pub fn clone_without_border(&self) -> Matrix<T> {
@@ -245,11 +240,7 @@ impl<T: Clone + PartialEq> Matrix<T> {
     }
 
     pub fn neighbors(&self, pos: &V2) -> Vec<V2> {
-        pos.neighbors()
-            .iter()
-            .filter(|nx| self.is_in(nx))
-            .cloned()
-            .collect()
+        pos.neighbors().iter().filter(|nx| self.is_in(nx)).cloned().collect()
     }
 }
 
@@ -303,13 +294,7 @@ pub fn time_it<R: fmt::Display>(p: fn(&str) -> R, p_str: &str, file: &str) {
     let start = Instant::now();
     let res = run_it(p, file);
     let duration = start.elapsed();
-    println!(
-        "[{}] {} : {} -> {}",
-        fmt_duration(duration),
-        p_str,
-        file,
-        res
-    );
+    println!("[{}] {} : {} -> {}", fmt_duration(duration), p_str, file, res);
 }
 
 // run p1/p2 function with the content of the file

@@ -44,8 +44,7 @@ impl Display for Op {
             Op::Or => "OR",
             Op::Xor => "XOR",
         };
-        write!(f, "{}", s)?;
-        Ok(())
+        write!(f, "{}", s)
     }
 }
 
@@ -81,12 +80,11 @@ impl Gate {
 impl Display for Gate {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // sort the inputs.. it makes it easier to read the output
-        // if self.in1.cmp(&self.in2) == std::cmp::Ordering::Less {
-        //     write!(f, "{} {} {} -> {}", self.in1, self.op, self.in2, self.out)?;
-        // } else {
-        write!(f, "{} {} {} -> {}", self.in2, self.op, self.in1, self.out)?;
-        // }
-        Ok(())
+        if self.in1.cmp(&self.in2) == std::cmp::Ordering::Less {
+            write!(f, "{} {} {} -> {}", self.in1, self.op, self.in2, self.out)
+        } else {
+            write!(f, "{} {} {} -> {}", self.in2, self.op, self.in1, self.out)
+        }
     }
 }
 
@@ -406,7 +404,8 @@ pub fn run() {
     pp_day("day24: Crossed Wires");
     time_it(p1, "p1", "data/24_sample.txt");
     time_it(p1, "p1", "data/24_sample2.txt");
-    time_it(p2, "p2", "data/24_input.txt");
+    time_it(p1, "p1", "data/24_input.txt");
+    // time_it(p2, "p2", "data/24_input.txt");
 }
 
 #[cfg(test)]
