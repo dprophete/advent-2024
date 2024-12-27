@@ -89,7 +89,7 @@ impl Display for Gate {
 }
 
 //--------------------------------------------------------------------------------
-// p1
+// puzzle
 //--------------------------------------------------------------------------------
 
 #[derive(Debug, Clone)]
@@ -142,44 +142,6 @@ impl Puzzle {
         }
     }
 
-    // run machine
-    pub fn eval(&mut self) {
-        self.reset_wires();
-
-        // now ready to eval
-        let mut gates_to_eval: HashSet<&Gate> = HashSet::new();
-        for g in self.gates.iter() {
-            gates_to_eval.insert(g);
-        }
-
-        // we are going to evaluate all the gates which have their wire ready
-        // and then go back to the beginning until all gates are evaluated
-        // note: this is not optimal at all...
-        // ideally we build a proper graph of gate evaluation order
-        while !gates_to_eval.is_empty() {
-            let mut gates_to_remove = vec![];
-            let mut wires_to_insert = HashMap::new();
-            for &g in gates_to_eval.iter() {
-                match (self.wires.get(&g.in1), self.wires.get(&g.in2)) {
-                    (Some(&in1), Some(&in2)) => {
-                        let gate_out = g.op.eval(in1, in2);
-                        // self.wires.insert(g.out.clone(), gate_out);
-                        wires_to_insert.insert(g.out.clone(), gate_out);
-                        gates_to_remove.push(g);
-                    }
-                    _ => {
-                        continue;
-                    }
-                }
-            }
-            self.wires.extend(wires_to_insert);
-
-            for g in gates_to_remove {
-                gates_to_eval.remove(g);
-            }
-        }
-    }
-
     // get the value of a var (x, y, z) by reading all the x01, x02, etc... wires
     fn get_var(&self, var: char) -> usize {
         // all the wires starting with the var prefix
@@ -211,7 +173,87 @@ impl Puzzle {
         }
     }
 
-    // we are going to rename the wires to make it easier to debug
+    pub fn check_add(&mut self, x: usize, y: usize) -> bool {
+        self.set_var('x', x);
+        self.set_var('y', y);
+        self.eval_dfs();
+        let z = self.get_var('z');
+        if x + y != z {
+            println!("bad:");
+            println!("  x  {:045b}", x);
+            println!("  y  {:045b}", y);
+            println!("  z {:046b}", z);
+            return false;
+        }
+        true
+    }
+}
+
+//--------------------------------------------------------------------------------
+// p1
+//--------------------------------------------------------------------------------
+
+impl Puzzle {
+    fn eval_wire_dfs(&mut self, w: String) -> bool {
+        match self.wires.get(&w) {
+            Some(&v) => v,
+            None => self.eval_gate_dfs(self.gates.iter().find(|g| g.out == w).unwrap().clone()),
+        }
+    }
+
+    fn eval_gate_dfs(&mut self, g: Gate) -> bool {
+        let in1 = self.eval_wire_dfs(g.in1);
+        let in2 = self.eval_wire_dfs(g.in2);
+        let out = g.op.eval(in1, in2);
+        self.wires.insert(g.out.clone(), out);
+        out
+    }
+
+    // run machine
+    // base dfs eval
+    pub fn eval_dfs(&mut self) {
+        self.reset_wires();
+
+        for g in self.gates.clone().iter() {
+            self.eval_gate_dfs(g.clone());
+        }
+    }
+}
+
+fn p1(input: &str) -> usize {
+    let mut puzzle = Puzzle::from_str(input);
+
+    puzzle.eval_dfs();
+    puzzle.get_var('z')
+}
+
+//--------------------------------------------------------------------------------
+// p2
+//--------------------------------------------------------------------------------
+
+impl Puzzle {
+    // swap two wires
+    pub fn swap_wires(&mut self, wire1: &str, wire2: &str) {
+        self.rename_wire(wire1, "TMP_SWAP");
+        self.rename_wire(wire2, wire1);
+        self.rename_wire("TMP_SWAP", wire2);
+    }
+
+    // rename wires
+    pub fn rename_wire(&mut self, old: &str, new: &str) {
+        // first rename wire it exists
+        if let Some(value) = self.wires.remove(old) {
+            self.wires.insert(String::from(new), value);
+        }
+        // then rename wire in gates
+        for g in self.gates.iter_mut() {
+            if g.out == old {
+                g.out = String::from(new);
+            }
+        }
+    }
+
+    // we are going to compute a friendly name for the wires it easier to debug
     // we want to get to a point where for each bit, we have the following:
     //
     //   C03 AND XOR_x03_y03 -> TMP03
@@ -256,6 +298,11 @@ impl Puzzle {
         rename_map
     }
 
+    // run the machine
+    //
+    // we are going to use a different strategy this time
+    // we will evaluate the gates layer by layer so as to identigy which gate is responsible
+    // for which bit
     pub fn eval_with_rename(&mut self) {
         self.reset_wires();
 
@@ -315,52 +362,7 @@ impl Puzzle {
             nb_iter += 1;
         }
     }
-
-    pub fn check_add(&mut self, x: usize, y: usize) -> bool {
-        self.set_var('x', x);
-        self.set_var('y', y);
-        self.eval();
-        let z = self.get_var('z');
-        if x + y != z {
-            println!("bad:");
-            println!("  x  {:045b}", x);
-            println!("  y  {:045b}", y);
-            println!("  z {:046b}", z);
-            return false;
-        }
-        true
-    }
-
-    pub fn swap_wires(&mut self, wire1: &str, wire2: &str) {
-        self.rename_wire(wire1, "TMP_SWAP");
-        self.rename_wire(wire2, wire1);
-        self.rename_wire("TMP_SWAP", wire2);
-    }
-
-    pub fn rename_wire(&mut self, old: &str, new: &str) {
-        // first rename wire it exists
-        if let Some(value) = self.wires.remove(old) {
-            self.wires.insert(String::from(new), value);
-        }
-        // then rename wire in gates
-        for g in self.gates.iter_mut() {
-            if g.out == old {
-                g.out = String::from(new);
-            }
-        }
-    }
 }
-
-fn p1(input: &str) -> usize {
-    let mut puzzle = Puzzle::from_str(input);
-
-    puzzle.eval();
-    puzzle.get_var('z')
-}
-
-//--------------------------------------------------------------------------------
-// p2
-//--------------------------------------------------------------------------------
 
 fn p2(input: &str) -> String {
     let mut puzzle = Puzzle::from_str(input);
@@ -405,7 +407,7 @@ pub fn run() {
     time_it(p1, "p1", "data/24_sample.txt");
     time_it(p1, "p1", "data/24_sample2.txt");
     time_it(p1, "p1", "data/24_input.txt");
-    // time_it(p2, "p2", "data/24_input.txt");
+    time_it(p2, "p2", "data/24_input.txt");
 }
 
 #[cfg(test)]
