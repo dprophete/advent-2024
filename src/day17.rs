@@ -152,7 +152,7 @@ fn p1(input: &str) -> String {
 //     2^24  -> 9 out
 //     2^27 -> 10 out
 //     2^30 -> 11 out
-// - in an internval where out is of length L (so 2^(L*3) to 2^(L*3+3)-1)
+// - in an interval where out is of length L (so 2^(L*3) to 2^(L*3+3)-1)
 //      - last out entry is always going through the same series: 4, 6, 7, 0, 1, 2, 3, repeated 2^(L*3) times each
 //      - previous out entry goes thought a sequence as well, each repeated 2^(L*3-3)
 //      - then previous out goes though a sequence of 2^(L*3-6)
